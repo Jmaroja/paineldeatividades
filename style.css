@@ -326,6 +326,12 @@ canvas {
     margin: 0 auto;
     max-width: 1200px;
 }
+/* Diminui a fonte dos eventos do calendário */
+#calendar .fc-event-title,
+#calendar .fc-event-time,
+#calendar .fc-event {
+    font-size: 0.95rem !important;
+}
 
 /* Tabela de atividades com ações */
 table {
