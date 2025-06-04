@@ -321,7 +321,7 @@ canvas {
 #calendar .fc-event-title,
 #calendar .fc-event-time,
 #calendar .fc-event {
-    font-size: 0.95rem !important;
+    font-size: 0.75rem !important;
     text-align: left !important;
     justify-content: flex-start !important;
 }
