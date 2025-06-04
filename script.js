@@ -2,7 +2,7 @@
 window.onload = function () {
     setTimeout(function () {
         document.getElementById('splash').style.display = 'none';
-    }, 1200);
+    }, 1100);
     document.getElementById('splash').style.display = '';
 };
 
@@ -11,12 +11,10 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
     event.preventDefault();
     fazerLogin();
 });
-
 function fazerLogin() {
     const usuario = document.getElementById('usuario').value.trim();
     const senha = document.getElementById('senha').value;
     const erroLogin = document.getElementById('erroLogin');
-
     db.collection('usuarios').doc(usuario).get().then((doc) => {
         if (doc.exists && doc.data().senha === senha) {
             sessionStorage.setItem('usuario', usuario);
@@ -30,14 +28,12 @@ function fazerLogin() {
         erroLogin.textContent = 'Erro ao acessar banco de dados.';
     });
 }
-
-// EXIBE O SISTEMA PÓS-LOGIN (com splash pós-login)
 function exibirSistema(usuario, tipo, departamento) {
     document.getElementById('splash').style.display = '';
     setTimeout(function () {
         document.getElementById('login').style.display = 'none';
         document.querySelector('header').style.display = '';
-        document.querySelector('.nav-tabs').style.display = 'flex';
+        document.querySelector('.painel-main').style.display = 'flex';
         document.getElementById('aba-calendario').style.display = '';
         document.getElementById('aba-dashboard').style.display = 'none';
         document.getElementById('aba-usuarios').style.display = 'none';
@@ -45,7 +41,7 @@ function exibirSistema(usuario, tipo, departamento) {
         document.querySelector('footer').style.display = '';
         document.getElementById('usuarioLogado').textContent = `Usuário: ${usuario}`;
         document.getElementById('departamentoLogado').textContent = departamento ? `Depto: ${departamento}` : '';
-        document.title = "Dashboard | Painel de Atividades";
+        document.title = "Painel de Atividades";
         if (tipo === "admin") {
             document.getElementById('btnUsuarios').style.display = '';
             document.getElementById('btnLimparCalendario').style.display = '';
@@ -59,22 +55,23 @@ function exibirSistema(usuario, tipo, departamento) {
             document.getElementById('btnLimparCalendario').style.display = 'none';
             document.getElementById('btnLogs').style.display = 'none';
         }
-        marcarAbaAtiva('btnCalendario');
+        marcarAbaAtiva('aba-calendario');
         carregarAtividades();
         listarUsuarios();
         inicializarCalendario();
-
+        verificarFinalizacaoAutomatica();
+        checarPendenciasDiaAnterior();
         setTimeout(function () {
             document.getElementById('splash').style.display = 'none';
         }, 1000);
-    }, 200);
+    }, 180);
 }
 
-// LOGOUT FLUXO
+// LOGOUT
 function fazerLogout() {
     sessionStorage.clear();
     document.querySelector('header').style.display = 'none';
-    document.querySelector('.nav-tabs').style.display = 'none';
+    document.querySelector('.painel-main').style.display = 'none';
     document.getElementById('aba-calendario').style.display = 'none';
     document.getElementById('aba-dashboard').style.display = 'none';
     document.getElementById('aba-usuarios').style.display = 'none';
@@ -85,38 +82,30 @@ function fazerLogout() {
     document.getElementById('usuario').value = '';
     document.getElementById('senha').value = '';
     document.getElementById('erroLogin').textContent = '';
-    marcarAbaAtiva('btnCalendario');
+    marcarAbaAtiva('aba-calendario');
 }
 
-// ABAS
+// Abas
 window.abrirAba = function (aba) {
-    document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
-    document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.painel-content section').forEach(sec => sec.style.display = 'none');
+    marcarAbaAtiva('aba-' + aba);
     document.getElementById('aba-' + aba).style.display = '';
-    document.getElementById('btn' + capitalize(aba)).classList.add('active');
-    if (aba === 'calendario') {
-        inicializarCalendario();
-        document.title = "Calendário | Painel de Atividades";
-    }
-    if (aba === 'dashboard') document.title = "Dashboard | Painel de Atividades";
-    if (aba === 'usuarios') document.title = "Usuários | Painel de Atividades";
-    if (aba === 'logs') {
-        carregarLogsExclusao();
-        document.title = "Logs de Exclusão | Painel de Atividades";
-    }
+    if (aba === 'dashboard') atualizarDashboard();
+    if (aba === 'logs') carregarLogsExclusao();
+    if (aba === 'usuarios') listarUsuarios();
+    if (aba === 'calendario') inicializarCalendario();
 };
-
-function marcarAbaAtiva(btnId) {
-    document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(btnId).classList.add('active');
+function marcarAbaAtiva(id) {
+    document.querySelectorAll('.nav-tabs button, .btn-sidebar-aba').forEach(btn => btn.classList.remove('active'));
+    let btn = document.querySelector(`#btn${capitalize(id.replace('aba-', ''))}`);
+    if (btn) btn.classList.add('active');
 }
-
 function capitalize(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// TEMA CLARO/ESCURO
+// Tema claro/escuro
 const btnTema = document.getElementById('btnTema');
 function aplicarTema(tema) {
     if (tema === 'dark') {
@@ -143,120 +132,16 @@ aplicarTema(temaSalvo);
     const tipo = sessionStorage.getItem('tipo');
     const departamento = sessionStorage.getItem('departamento');
     if (usuario && tipo) {
-        setTimeout(() => exibirSistema(usuario, tipo, departamento), 100);
+        setTimeout(() => exibirSistema(usuario, tipo, departamento), 120);
     }
 })();
 
-// ATIVIDADES / CRUD / CALENDÁRIO
+// ATIVIDADES - CRUD
 let todasAtividades = [];
 let atividadesFiltradas = [];
 let calendar = null;
-
-// FILTRO DE DEPARTAMENTO
-window.filtrarPorDepartamento = function() {
-    const dep = document.getElementById('departamentoSelect').value;
-    const resp = document.getElementById('responsavelSelect').value;
-    if (dep === 'todos') {
-        atividadesFiltradas = [...todasAtividades];
-    } else {
-        atividadesFiltradas = todasAtividades.filter(a => (a.departamento || '') === dep);
-    }
-    // Depois, aplica filtro de responsável se necessário
-    if (resp !== 'todos') {
-        atividadesFiltradas = atividadesFiltradas.filter(a => a.responsavel === resp);
-    }
-    renderizarTabelaAtividades();
-    atualizarDashboard();
-    renderizarGraficos();
-    inicializarCalendario();
-};
-
-// FILTRAR POR RESPONSÁVEL (dentro do departamento)
-window.filtrarPorResponsavel = function () {
-    const dep = document.getElementById('departamentoSelect').value;
-    const resp = document.getElementById('responsavelSelect').value;
-    if (dep === 'todos' && resp === 'todos') {
-        atividadesFiltradas = [...todasAtividades];
-    } else if (dep !== 'todos' && resp === 'todos') {
-        atividadesFiltradas = todasAtividades.filter(a => (a.departamento || '') === dep);
-    } else if (dep === 'todos' && resp !== 'todos') {
-        atividadesFiltradas = todasAtividades.filter(a => a.responsavel === resp);
-    } else {
-        atividadesFiltradas = todasAtividades.filter(a => (a.departamento || '') === dep && a.responsavel === resp);
-    }
-    renderizarTabelaAtividades();
-    atualizarDashboard();
-    renderizarGraficos();
-    inicializarCalendario();
-};
-
-// BOTÃO LIMPAR CALENDÁRIO (admin)
-document.getElementById('btnLimparCalendario').onclick = async function() {
-    if (!confirm('Tem certeza que deseja APAGAR TODAS as atividades do calendário? Esta ação NÃO pode ser desfeita.')) return;
-    const snapshot = await db.collection('atividades').get();
-    const batch = db.batch();
-    snapshot.forEach(doc => batch.delete(doc.ref));
-    await batch.commit();
-    alert('Todas as atividades foram apagadas!');
-    carregarAtividades();
-};
-
-// ADICIONAR ATIVIDADE (botão + modal)
-document.getElementById('btnAdicionarAtividade').onclick = function() {
-    const usuario = sessionStorage.getItem('usuario') || "";
-    const tipo = sessionStorage.getItem('tipo');
-    document.getElementById('novaData').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('novaAtividade').value = "";
-    document.getElementById('novoTipoAtividade').value = "urgente";
-    document.getElementById('novaDescricao').value = "";
-    document.getElementById('msgAdicionarAtividade').textContent = "";
-    if (tipo === "admin" || tipo === "gestor") {
-        document.getElementById('divResponsavelAdicionar').style.display = '';
-        document.getElementById('novoResponsavel').value = "";
-    } else {
-        document.getElementById('divResponsavelAdicionar').style.display = 'none';
-        document.getElementById('novoResponsavel').value = usuario;
-    }
-    document.getElementById('modalAdicionarAtividade').style.display = 'block';
-};
-function fecharModalAdicionarAtividade() {
-    document.getElementById('modalAdicionarAtividade').style.display = 'none';
-}
-
-// Salvar nova atividade
-document.getElementById('formAdicionarAtividade').onsubmit = async function(e) {
-    e.preventDefault();
-    const data = document.getElementById('novaData').value;
-    const tipoAtv = document.getElementById('novoTipoAtividade').value;
-    let responsavel = document.getElementById('novoResponsavel').value.trim();
-    let atividade = document.getElementById('novaAtividade').value.trim();
-    let descricao = document.getElementById('novaDescricao').value.trim();
-    let departamento = sessionStorage.getItem('tipo') === "admin" || sessionStorage.getItem('tipo') === "gestor"
-        ? (usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : sessionStorage.getItem('departamento'))
-        : sessionStorage.getItem('departamento');
-    if (!data || !responsavel || !atividade) {
-        document.getElementById('msgAdicionarAtividade').textContent = "Preencha todos os campos obrigatórios.";
-        return;
-    }
-    await db.collection('atividades').add({
-        data: data,
-        responsavel: responsavel,
-        atividade: atividade,
-        tipo: tipoAtv,
-        descricao: descricao,
-        departamento: departamento || '',
-        status: 'pendente'
-    });
-    document.getElementById('msgAdicionarAtividade').textContent = "Atividade adicionada com sucesso!";
-    setTimeout(() => {
-        fecharModalAdicionarAtividade();
-        carregarAtividades();
-    }, 900);
-};
-
 let usuariosMap = {};
 function listarUsuariosMap() {
-    // Auxiliar para departamento-responsável
     db.collection('usuarios').get().then(snapshot => {
         usuariosMap = {};
         snapshot.forEach(doc => {
@@ -266,14 +151,100 @@ function listarUsuariosMap() {
 }
 listarUsuariosMap();
 
-window.onload = function () {
-    setTimeout(function () {
-        document.getElementById('splash').style.display = 'none';
-    }, 1200);
-    document.getElementById('splash').style.display = '';
-    listarUsuariosMap();
+// Finalização automática às 18h (local)
+function verificarFinalizacaoAutomatica() {
+    const usuario = sessionStorage.getItem('usuario');
+    if (!usuario) return;
+    const agora = new Date();
+    if (agora.getHours() >= 18) {
+        db.collection('atividades').get().then(snapshot => {
+            const batch = db.batch();
+            snapshot.forEach(doc => {
+                const atv = doc.data();
+                if (atv.status !== "realizado" && atv.status !== "naoRealizado" && atv.data === agora.toISOString().slice(0,10)) {
+                    batch.update(doc.ref, {
+                        status: "naoRealizado",
+                        motivo: "Não finalizada no prazo"
+                    });
+                }
+            });
+            if (!snapshot.empty) return batch.commit().then(() => carregarAtividades());
+        });
+    }
+}
+
+// Checar pendências do dia anterior
+function checarPendenciasDiaAnterior() {
+    const usuario = sessionStorage.getItem('usuario');
+    if (!usuario) return;
+    const ontem = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    db.collection('atividades').where('responsavel', '==', usuario)
+        .where('data', '==', ontem)
+        .where('status', '!=', 'realizado')
+        .get().then(snapshot => {
+            let pendentes = [];
+            snapshot.forEach(doc => {
+                let a = doc.data();
+                a.id = doc.id;
+                if (a.status !== 'realizado') pendentes.push(a);
+            });
+            if (pendentes.length > 0) {
+                mostrarModalPendencias(pendentes);
+            }
+        });
+}
+
+// Modal de pendências
+function mostrarModalPendencias(pendentes) {
+    let lista = document.getElementById('listaPendencias');
+    lista.innerHTML = '';
+    pendentes.forEach(a => {
+        lista.innerHTML += `
+        <div class="pendencia-bloco">
+            <div><b>Atividade:</b> ${a.atividade}</div>
+            <div><b>Data:</b> ${a.data}</div>
+            <div><b>Status:</b> ${statusFormatado(a.status, a.motivo)}</div>
+            <button class="btn-pendencia realizado" onclick="marcarPendenciaRealizado('${a.id}')">Marcar como Realizado</button>
+            <button class="btn-pendencia reagendar" onclick="reagendarPendencia('${a.id}')">Reagendar para hoje</button>
+            <button class="btn-pendencia naorealizado" onclick="marcarPendenciaNaoRealizado('${a.id}')">Confirmar Não Realizado</button>
+        </div>
+        `;
+    });
+    document.getElementById('modalPendencias').style.display = 'block';
+}
+window.fecharModalPendencias = function() {
+    document.getElementById('modalPendencias').style.display = 'none';
 };
-// IMPORTAÇÃO CSV EM LOTE (batchs de 400)
+window.marcarPendenciaRealizado = function(id) {
+    db.collection('atividades').doc(id).update({
+        status: 'realizado',
+        motivo: ''
+    }).then(() => {
+        fecharModalPendencias();
+        carregarAtividades();
+    });
+};
+window.reagendarPendencia = function(id) {
+    const hoje = new Date().toISOString().slice(0,10);
+    db.collection('atividades').doc(id).update({
+        data: hoje,
+        status: 'pendente',
+        motivo: ''
+    }).then(() => {
+        fecharModalPendencias();
+        carregarAtividades();
+    });
+};
+window.marcarPendenciaNaoRealizado = function(id) {
+    db.collection('atividades').doc(id).update({
+        status: 'naoRealizado',
+        motivo: 'Não finalizada no prazo'
+    }).then(() => {
+        fecharModalPendencias();
+        carregarAtividades();
+    });
+};
+// ----------- ATIVIDADES - CRUD & CALENDÁRIO ------------
 window.processCSV = function () {
     const file = document.getElementById('csvFile').files[0];
     if (!file) return;
@@ -337,7 +308,6 @@ function carregarAtividades() {
         exibirAlertaTarefasDia();
     });
 }
-
 function preencherSelectDepartamento() {
     const select = document.getElementById('departamentoSelect');
     const departamentos = [...new Set(todasAtividades.map(a => a.departamento || 'Outros'))];
@@ -354,8 +324,6 @@ function preencherSelectResponsavel() {
         select.innerHTML += `<option value="${r}">${r}</option>`;
     });
 }
-
-// BANNER DE ALERTA DE TAREFAS DO DIA
 function exibirAlertaTarefasDia() {
     const usuario = sessionStorage.getItem('usuario');
     const tipo = sessionStorage.getItem('tipo');
@@ -379,7 +347,6 @@ function exibirAlertaTarefasDia() {
     }
 }
 
-// CALENDÁRIO COM CORES E TOOLTIP
 function inicializarCalendario() {
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
@@ -404,10 +371,10 @@ function inicializarCalendario() {
             title: a.atividade,
             start: a.data,
             color: a.status === "realizado"
-                ? "#22b573" // Verde para realizado
+                ? "#22b573"
                 : a.tipo === "urgente" ? "#e74c3c"
                 : a.tipo === "recorrente" ? "#2980ef"
-                : "#ffc107", // Amarelo escuro para extra
+                : "#ffc107",
             classNames: [
                 a.status === "realizado" ? "realizado" : (a.tipo || 'urgente')
             ],
@@ -461,7 +428,6 @@ function inicializarCalendario() {
         });
     }, 300);
 }
-
 function abrirModalPelaData(data, atividadeTitulo) {
     const atv = todasAtividades.find(a =>
         a.data === data &&
@@ -471,8 +437,6 @@ function abrirModalPelaData(data, atividadeTitulo) {
         window.abrirModal(atv.id);
     }
 }
-
-// RENDERIZAR TABELA COM AÇÕES E TIPO
 function renderizarTabelaAtividades() {
     const usuario = sessionStorage.getItem('usuario');
     const tipo = sessionStorage.getItem('tipo');
@@ -504,7 +468,7 @@ function statusFormatado(status, motivo) {
     return 'Pendente';
 }
 
-// MODAL DETALHE ATIVIDADE (visualização)
+// MODAIS DE ATIVIDADE
 let atividadeSelecionada = null;
 window.abrirModal = function (id) {
     atividadeSelecionada = todasAtividades.find(a => a.id === id);
@@ -588,6 +552,7 @@ document.getElementById('formEditarAtividade').onsubmit = async function(e) {
         carregarAtividades();
     }, 900);
 };
+
 // MODAL EXCLUIR ATIVIDADE (com motivo e log)
 window.abrirModalExcluirAtividade = function(id) {
     const atv = todasAtividades.find(a => a.id === id);
@@ -632,27 +597,7 @@ document.getElementById('btnConfirmarExcluir').onclick = async function() {
     alert("Atividade excluída e log registrada!");
 };
 
-// LOGS DE EXCLUSÃO (admin)
-function carregarLogsExclusao() {
-    if (sessionStorage.getItem('tipo') !== 'admin') return;
-    db.collection('logs_exclusao').orderBy('datahora', 'desc').get().then(snapshot => {
-        const tbody = document.getElementById('tabelaLogs').querySelector('tbody');
-        tbody.innerHTML = '';
-        snapshot.forEach(doc => {
-            const l = doc.data();
-            tbody.innerHTML += `
-                <tr>
-                    <td>${l.datahora.replace('T',' ').replace('.000Z','')}</td>
-                    <td>${l.quem}</td>
-                    <td>${l.motivo}</td>
-                    <td>${l.atividade.data} - ${l.atividade.departamento || ''} - ${l.atividade.responsavel} - ${l.atividade.atividade} [${capitalize(l.atividade.tipo)}]</td>
-                </tr>
-            `;
-        });
-    });
-}
-
-// DASHBOARD RESUMO
+// ----------- DASHBOARD, GRÁFICOS, LOGS E EXPORTAÇÃO -----------
 function atualizarDashboard() {
     document.getElementById('totalAtividades').textContent = atividadesFiltradas.length;
     const realizadas = atividadesFiltradas.filter(a => a.status === 'realizado').length;
@@ -662,8 +607,6 @@ function atualizarDashboard() {
     document.getElementById('percentualConclusao').textContent =
         atividadesFiltradas.length ? Math.round(realizadas / atividadesFiltradas.length * 100) + '%' : '0%';
 }
-
-// GRÁFICOS
 let chartBarras, chartLinha, chartMotivos;
 function renderizarGraficos() {
     // Barras
@@ -682,7 +625,6 @@ function renderizarGraficos() {
             }]
         }
     });
-
     // Linha
     const ctxLinha = document.getElementById('graficoLinha').getContext('2d');
     if (chartLinha) chartLinha.destroy();
@@ -703,7 +645,6 @@ function renderizarGraficos() {
             }]
         }
     });
-
     // Motivos (pizza)
     const ctxMotivos = document.getElementById('graficoMotivos').getContext('2d');
     if (chartMotivos) chartMotivos.destroy();
@@ -738,12 +679,11 @@ window.exportarResumo = function () {
     document.body.removeChild(a);
 }
 
-// USUÁRIOS (ADMIN / GESTOR)
+// ----------- USUÁRIOS (CRUD ADMIN/GESTOR) -----------
 document.getElementById('usuarioForm').addEventListener('submit', function(event) {
     event.preventDefault();
     adicionarUsuario();
 });
-
 function adicionarUsuario() {
     const usuario = document.getElementById('novoUsuario').value.trim();
     const senha = document.getElementById('novaSenha').value;
@@ -781,14 +721,32 @@ function listarUsuarios() {
             tbody.innerHTML += `
                 <tr>
                     <td>${doc.id}</td>
-                    <td>${u.email || '-'}</td>
-                    <td>${u.departamento || '-'}</td>
-                    <td>${u.tipo}</td>
+                    <td><input type="email" id="email-${doc.id}" value="${u.email || ''}" style="width:150px"></td>
+                    <td>
+                        <select id="dep-${doc.id}">
+                            <option value="DP"${u.departamento==="DP"?" selected":""}>DP</option>
+                            <option value="Comercial"${u.departamento==="Comercial"?" selected":""}>Comercial</option>
+                            <option value="Financeiro"${u.departamento==="Financeiro"?" selected":""}>Financeiro</option>
+                            <option value="TI"${u.departamento==="TI"?" selected":""}>TI</option>
+                            <option value="Compras"${u.departamento==="Compras"?" selected":""}>Compras</option>
+                            <option value="Outros"${u.departamento==="Outros"?" selected":""}>Outros</option>
+                        </select>
+                        <button class="acao-btn senha" onclick="alterarDepartamentoUsuario('${doc.id}')">Salvar</button>
+                    </td>
+                    <td>
+                        <select id="tipo-${doc.id}">
+                            <option value="comum"${u.tipo==="comum"?" selected":""}>Comum</option>
+                            <option value="gestor"${u.tipo==="gestor"?" selected":""}>Gestor</option>
+                            <option value="admin"${u.tipo==="admin"?" selected":""}>Admin</option>
+                        </select>
+                        <button class="acao-btn senha" onclick="alterarTipoUsuario('${doc.id}')">Salvar</button>
+                    </td>
                     <td>
                         <input type="text" id="senha-${doc.id}" value="${u.senha}" readonly style="width:90px;">
                         <button class="acao-btn senha" onclick="editarSenhaUsuario('${doc.id}')">Alterar</button>
                     </td>
                     <td>
+                        <button onclick="alterarEmailUsuario('${doc.id}')">Salvar Email</button>
                         <button onclick="removerUsuario('${doc.id}')">Remover</button>
                     </td>
                 </tr>
@@ -796,7 +754,24 @@ function listarUsuarios() {
         });
     });
 }
-
+window.alterarDepartamentoUsuario = function(usuario) {
+    const novoDep = document.getElementById('dep-' + usuario).value;
+    db.collection('usuarios').doc(usuario).update({
+        departamento: novoDep
+    }).then(() => {
+        alert('Departamento alterado!');
+        listarUsuarios();
+    });
+};
+window.alterarTipoUsuario = function(usuario) {
+    const novoTipo = document.getElementById('tipo-' + usuario).value;
+    db.collection('usuarios').doc(usuario).update({
+        tipo: novoTipo
+    }).then(() => {
+        alert('Tipo alterado!');
+        listarUsuarios();
+    });
+};
 window.editarSenhaUsuario = function(usuario) {
     const novaSenha = prompt('Nova senha para o usuário:');
     if (!novaSenha) return;
@@ -807,7 +782,15 @@ window.editarSenhaUsuario = function(usuario) {
         listarUsuarios();
     });
 };
-
+window.alterarEmailUsuario = function(usuario) {
+    const novoEmail = document.getElementById('email-' + usuario).value;
+    db.collection('usuarios').doc(usuario).update({
+        email: novoEmail
+    }).then(() => {
+        alert('E-mail alterado!');
+        listarUsuarios();
+    });
+};
 window.removerUsuario = function(usuario) {
     if (confirm(`Remover usuário ${usuario}?`)) {
         db.collection('usuarios').doc(usuario).delete().then(() => {
@@ -817,6 +800,26 @@ window.removerUsuario = function(usuario) {
     }
 }
 
+// LOGS DE EXCLUSÃO (admin)
+function carregarLogsExclusao() {
+    if (sessionStorage.getItem('tipo') !== 'admin') return;
+    db.collection('logs_exclusao').orderBy('datahora', 'desc').get().then(snapshot => {
+        const tbody = document.getElementById('tabelaLogs').querySelector('tbody');
+        tbody.innerHTML = '';
+        snapshot.forEach(doc => {
+            const l = doc.data();
+            tbody.innerHTML += `
+                <tr>
+                    <td>${l.datahora.replace('T',' ').replace('.000Z','')}</td>
+                    <td>${l.quem}</td>
+                    <td>${l.motivo}</td>
+                    <td>${l.atividade.data} - ${l.atividade.departamento || ''} - ${l.atividade.responsavel} - ${l.atividade.atividade} [${capitalize(l.atividade.tipo)}]</td>
+                </tr>
+            `;
+        });
+    });
+}
+
 // ESC só fecha modais (NÃO desloga)
 document.addEventListener('keydown', function(e) {
     if (e.key === "Escape") {
@@ -824,6 +827,61 @@ document.addEventListener('keydown', function(e) {
         fecharModalAdicionarAtividade();
         fecharModalEditarAtividade();
         fecharModalExcluirAtividade();
-        fecharModalAjuda();
+        fecharModalAjuda && fecharModalAjuda();
+        fecharModalPendencias && fecharModalPendencias();
     }
 });
+// Modal Add
+document.getElementById('btnAdicionarAtividade').onclick = function() {
+    const usuario = sessionStorage.getItem('usuario') || "";
+    const tipo = sessionStorage.getItem('tipo');
+    document.getElementById('novaData').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('novaAtividade').value = "";
+    document.getElementById('novoTipoAtividade').value = "urgente";
+    document.getElementById('novaDescricao').value = "";
+    document.getElementById('msgAdicionarAtividade').textContent = "";
+    if (tipo === "admin" || tipo === "gestor") {
+        document.getElementById('divResponsavelAdicionar').style.display = '';
+        document.getElementById('novoResponsavel').value = "";
+    } else {
+        document.getElementById('divResponsavelAdicionar').style.display = 'none';
+        document.getElementById('novoResponsavel').value = usuario;
+    }
+    document.getElementById('modalAdicionarAtividade').style.display = 'block';
+};
+function fecharModalAdicionarAtividade() {
+    document.getElementById('modalAdicionarAtividade').style.display = 'none';
+}
+document.getElementById('formAdicionarAtividade').onsubmit = async function(e) {
+    e.preventDefault();
+    const data = document.getElementById('novaData').value;
+    const tipoAtv = document.getElementById('novoTipoAtividade').value;
+    let responsavel = document.getElementById('novoResponsavel').value.trim();
+    let atividade = document.getElementById('novaAtividade').value.trim();
+    let descricao = document.getElementById('novaDescricao').value.trim();
+    let departamento = sessionStorage.getItem('tipo') === "admin" || sessionStorage.getItem('tipo') === "gestor"
+        ? (usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : sessionStorage.getItem('departamento'))
+        : sessionStorage.getItem('departamento');
+    if (!data || !responsavel || !atividade) {
+        document.getElementById('msgAdicionarAtividade').textContent = "Preencha todos os campos obrigatórios.";
+        return;
+    }
+    await db.collection('atividades').add({
+        data: data,
+        responsavel: responsavel,
+        atividade: atividade,
+        tipo: tipoAtv,
+        descricao: descricao,
+        departamento: departamento || '',
+        status: 'pendente'
+    });
+    document.getElementById('msgAdicionarAtividade').textContent = "Atividade adicionada com sucesso!";
+    setTimeout(() => {
+        fecharModalAdicionarAtividade();
+        carregarAtividades();
+    }, 900);
+};
+// Modais extras
+function fecharModalAjuda() {
+    document.getElementById('modalAjuda').style.display = 'none';
+}
