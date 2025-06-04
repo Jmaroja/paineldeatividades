@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Login | Acompanhamento de Atividades - DP</title>
+    <title>Painel de Atividades</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
@@ -33,23 +33,22 @@
 <header style="display:none;">
     <div class="header-content">
         <img src="logo.png" class="logo" alt="Nordil Logo">
-        <h1>Acompanhamento de Atividades - Departamento Pessoal</h1>
+        <h1>Acompanhamento de Atividades</h1>
         <span id="usuarioLogado" class="usuario-logado"></span>
-        <button id="btnAjuda" title="Instruções" class="btn-header">
-            <svg width="20" height="20" fill="none" stroke="#0a49a7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
-                <circle cx="10" cy="10" r="8.5"/>
-                <text x="10" y="15" text-anchor="middle" font-size="14" fill="#0a49a7" font-family="Arial, sans-serif">?</text>
-            </svg>
-        </button>
+        <button id="btnAjuda" title="Instruções" class="btn-header">❓</button>
         <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
         <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
     </div>
 </header>
 
+<!-- Banner de alerta do dia -->
+<div id="alertaTarefasDia" class="alerta-tarefas-dia" style="display: none;"></div>
+
 <div class="nav-tabs" style="display:none;">
     <button id="btnCalendario" class="active" onclick="abrirAba('calendario')">📅 <span>Calendário</span></button>
     <button id="btnDashboard" onclick="abrirAba('dashboard')">📊 <span>Dashboard</span></button>
     <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;">👥 <span>Usuários</span></button>
+    <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;">📝 <span>Logs de Exclusão</span></button>
 </div>
 
 <!-- Calendário -->
@@ -87,28 +86,6 @@
     <div id="calendar"></div>
 </section>
 
-<!-- Modal Adicionar Atividade -->
-<div id="modalAdicionarAtividade" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="fecharModalAdicionarAtividade()">&times;</span>
-        <h3>Adicionar Nova Atividade</h3>
-        <form id="formAdicionarAtividade" autocomplete="off">
-            <label>Data:<br>
-                <input type="date" id="novaData" required>
-            </label><br>
-            <label>Responsável:<br>
-                <input type="text" id="novoResponsavel" required>
-            </label><br>
-            <label>Atividade:<br>
-                <input type="text" id="novaAtividade" required>
-            </label><br>
-            <button type="submit" class="btn-adicionar" style="margin-top:14px;width:100%;">Salvar</button>
-        </form>
-        <p id="msgAdicionarAtividade" style="color:#2ecc71; margin-top:6px;"></p>
-    </div>
-</div>
-
-
 <!-- Dashboard -->
 <section id="aba-dashboard" style="display:none;">
     <div class="dashboard">
@@ -131,9 +108,12 @@
                     <th>Responsável</th>
                     <th>Atividade</th>
                     <th>Status</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <!-- Preenchido pelo JS -->
+            </tbody>
         </table>
     </div>
 </section>
@@ -163,7 +143,78 @@
     </table>
 </section>
 
-<!-- Modal Atividade -->
+<!-- Logs de Exclusão (admin) -->
+<section id="aba-logs" style="display:none;">
+    <h2>Logs de Exclusão</h2>
+    <table id="tabelaLogs">
+        <thead>
+            <tr>
+                <th>Data/Hora</th>
+                <th>Quem Excluiu</th>
+                <th>Motivo</th>
+                <th>Atividade Excluída</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</section>
+
+<!-- Modal Adicionar Atividade -->
+<div id="modalAdicionarAtividade" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalAdicionarAtividade()">&times;</span>
+        <h3>Adicionar Nova Atividade</h3>
+        <form id="formAdicionarAtividade" autocomplete="off">
+            <label>Data:<br>
+                <input type="date" id="novaData" required>
+            </label><br>
+            <label>Responsável:<br>
+                <input type="text" id="novoResponsavel" required>
+            </label><br>
+            <label>Atividade:<br>
+                <input type="text" id="novaAtividade" required>
+            </label><br>
+            <button type="submit" class="btn-adicionar" style="margin-top:14px;width:100%;">Salvar</button>
+        </form>
+        <p id="msgAdicionarAtividade" style="color:#2ecc71; margin-top:6px;"></p>
+    </div>
+</div>
+
+<!-- Modal Editar Atividade -->
+<div id="modalEditarAtividade" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalEditarAtividade()">&times;</span>
+        <h3>Editar Atividade</h3>
+        <form id="formEditarAtividade" autocomplete="off">
+            <label>Data:<br>
+                <input type="date" id="editarData" required>
+            </label><br>
+            <label>Responsável:<br>
+                <input type="text" id="editarResponsavel" required>
+            </label><br>
+            <label>Atividade:<br>
+                <input type="text" id="editarAtividade" required>
+            </label><br>
+            <button type="submit" class="btn-adicionar" style="margin-top:14px;width:100%;">Salvar Alterações</button>
+        </form>
+        <p id="msgEditarAtividade" style="color:#2ecc71; margin-top:6px;"></p>
+    </div>
+</div>
+
+<!-- Modal Excluir Atividade -->
+<div id="modalExcluirAtividade" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalExcluirAtividade()">&times;</span>
+        <h3>Excluir Atividade</h3>
+        <p id="infoExcluirAtividade"></p>
+        <label>Motivo da exclusão:<br>
+            <input type="text" id="motivoExclusao" required placeholder="Descreva o motivo..." autocomplete="off">
+        </label>
+        <button id="btnConfirmarExcluir" class="btn-limpar" style="margin-top:16px;width:100%;">Excluir Definitivamente</button>
+    </div>
+</div>
+
+<!-- Modal Atividade (visualização/realização) -->
 <div id="modalAtividade" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fecharModal()">&times;</span>
@@ -204,7 +255,7 @@
             <li><b>Tema:</b> Use 🌙/☀️ para alternar entre claro e escuro.</li>
             <li><b>Sair:</b> Clique em "Sair" ou pressione <b>ESC</b> para sair.</li>
         </ul>
-        <p style="font-size: 0.9em; margin-top: 10px; color: #555;">Dúvidas ou problemas? Fale com o suporte DP/Nordil.</p>
+        <p style="font-size: 0.9em; margin-top: 10px; color: #555;">Dúvidas ou problemas? Fale com o suporte.</p>
     </div>
 </div>
 
@@ -212,7 +263,7 @@
 <footer style="display:none;">
     <div class="footer-content">
         <img src="logo.png" alt="Nordil" class="logo-footer">
-        <span>&copy; <span id="anoAtual"></span> Nordil • Departamento Pessoal</span>
+        <span>&copy; <span id="anoAtual"></span> Nordil • Painel de Atividades</span>
     </div>
 </footer>
 
