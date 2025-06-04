@@ -324,7 +324,7 @@ canvas {
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     margin: 0 auto;
-    max-width: 1200px;
+    max-width: 1400px;
 }
 /* Diminui a fonte dos eventos do calendário */
 #calendar .fc-event-title,
