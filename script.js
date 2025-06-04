@@ -82,15 +82,6 @@ function fazerLogout() {
     marcarAbaAtiva('btnCalendario');
 }
 
-// ESC = LOGOUT
-document.addEventListener('keydown', function (e) {
-    if (e.key === "Escape") {
-        if (document.querySelector('header').style.display !== 'none') {
-            fazerLogout();
-        }
-    }
-});
-
 // ABAS
 window.abrirAba = function (aba) {
     document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
