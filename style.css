@@ -576,3 +576,28 @@ body.dark .sidebar select, body.dark .input-upload {
 body.dark ::-webkit-scrollbar-thumb {
     background: #33486d;
 }
+.header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 18px;
+    justify-content: flex-start;
+    position: relative;
+}
+.header-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    gap: 10px;
+}
+.usuario-logado,
+.departamento-logado {
+    font-size: 1rem;
+    color: #fff;
+    background: rgba(255,255,255,0.10);
+    padding: 6px 14px;
+    border-radius: 9px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin: 0 4px;
+}

@@ -33,8 +33,9 @@
     <div class="header-content">
         <img src="logo.png" class="logo" alt="Nordil Logo">
         <h1>Painel de Atividades</h1>
-        <span id="usuarioLogado" class="usuario-logado"></span>
-        <span id="departamentoLogado" class="departamento-logado"></span>
+        <div class="header-right">
+    <span id="usuarioLogado" class="usuario-logado"></span>
+    <span id="departamentoLogado" class="departamento-logado"></span>
         <div class="legend-corner" id="legendaCores">
             <b>Legenda:</b>
             <div><span class="leg-dot urgente"></span> Urgente</div>
@@ -44,8 +45,8 @@
             <div><span class="leg-dot pendente"></span> Pendente</div>
         </div>
         <button id="btnAjuda" title="Instruções" class="btn-header">❓</button>
-        <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
-        <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
+    <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
+    <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
     </div>
 </header>
 
@@ -71,11 +72,13 @@
                 <option value="todos">Todos</option>
             </select>
         </div>
-        <div class="sidebar-group" style="margin-top:40px;">
-            <button id="btnDashboard" onclick="abrirAba('dashboard')" class="btn-sidebar-aba">📊 Dashboard</button>
-            <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;" class="btn-sidebar-aba">👥 Usuários</button>
-            <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;" class="btn-sidebar-aba">📝 Logs de Exclusão</button>
-        </div>
+       <div class="sidebar-group" style="margin-top:40px;">
+    <button id="btnCalendario" onclick="abrirAba('calendario')" class="btn-sidebar-aba">📅 Calendário</button>
+    <button id="btnDashboard" onclick="abrirAba('dashboard')" class="btn-sidebar-aba">📊 Dashboard</button>
+    <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;" class="btn-sidebar-aba">👥 Usuários</button>
+    <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;" class="btn-sidebar-aba">📝 Logs de Exclusão</button>
+</div>
+
     </div>
 
     <!-- CONTEÚDO PRINCIPAL -->
