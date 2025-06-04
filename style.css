@@ -1,16 +1,22 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* FONTES */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', Arial, sans-serif;
+    font-weight: 700;
     background-color: #f4f6fa;
     padding: 20px;
 }
 
-/* Header */
+h1, h2, h3, .header-content {
+    font-family: 'Oswald', 'Roboto', Arial, sans-serif;
+    font-weight: 500;
+}
+
+.btn-adicionar, .btn-limpar, .btn-upload, .nav-tabs button, table th, .alerta-tarefas-dia {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-weight: 700;
+}
+
+/* HEADER */
 header {
     background-color: #0a49a7;
     color: white;
@@ -30,8 +36,7 @@ header .logo {
 
 header h1 {
     margin: 0;
-    font-size: 1.7rem;
-    font-weight: bold;
+    font-size: 2.1rem;
     letter-spacing: 0.01em;
 }
 
@@ -44,7 +49,8 @@ header h1 {
     position: relative;
 }
 
-.usuario-logado {
+.usuario-logado,
+.departamento-logado {
     font-size: 1rem;
     color: #fff;
     margin-left: auto;
@@ -53,6 +59,7 @@ header h1 {
     padding: 5px 16px;
     border-radius: 9px;
     font-weight: 600;
+    letter-spacing: 0.04em;
 }
 
 .btn-header {
@@ -63,7 +70,7 @@ header h1 {
     padding: 7px 13px;
     margin-left: 7px;
     cursor: pointer;
-    font-size: 1.07rem;
+    font-size: 1.1rem;
     font-weight: bold;
     min-width: 42px;
     min-height: 36px;
@@ -152,7 +159,7 @@ body.dark .alerta-tarefas-dia {
     flex-direction: column;
     gap: 17px;
     min-width: 270px;
-    max-width: 420px;
+    max-width: 430px;
 }
 
 .card-header {
@@ -216,7 +223,6 @@ body.dark .alerta-tarefas-dia {
     border: none;
     padding: 9px 15px;
 }
-
 .btn-upload:hover {
     background: linear-gradient(90deg, #1548b4 80%, #19ac8c 100%);
 }
@@ -228,7 +234,6 @@ body.dark .alerta-tarefas-dia {
     font-weight: 700;
     padding: 9px 15px;
 }
-
 .btn-limpar:hover {
     background: #b92b19;
 }
@@ -240,7 +245,6 @@ body.dark .alerta-tarefas-dia {
     font-weight: 700;
     padding: 9px 15px;
 }
-
 .btn-adicionar:hover {
     background: #1844b4;
 }
@@ -253,19 +257,40 @@ body.dark .alerta-tarefas-dia {
     font-size: 1rem;
 }
 
-/* Filtro */
-.card-filtro label {
-    margin-bottom: 8px;
-    font-weight: 600;
+/* Selects Departamento/Tipo */
+#novoDepartamento, #novoTipo, #departamentoSelect, #responsavelSelect {
+    width: 100%;
+    padding: 11px 8px;
+    border-radius: 7px;
+    font-size: 1.09rem;
+    margin-top: 6px;
+    margin-bottom: 9px;
+    border: 1.5px solid #bcd7fc;
+    background: #f8fbff;
+    font-weight: 700;
+    color: #243250;
 }
 
-.card-filtro select {
+.select-tipo-atividade {
+    width: 100%;
+    padding: 12px 8px;
+    border-radius: 7px;
+    font-size: 1.13rem;
     margin-top: 3px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #bcd7fc;
-    background: #f8fbff;
-    font-size: 1.02rem;
+    margin-bottom: 12px;
+    border: 1.5px solid #bcd7fc;
+    background: #f7fbff;
+    font-weight: 600;
+    color: #243250;
+}
+body.dark .select-tipo-atividade,
+body.dark #novoDepartamento, 
+body.dark #novoTipo,
+body.dark #departamentoSelect, 
+body.dark #responsavelSelect {
+    background: #232d44;
+    color: #fff;
+    border-color: #355ca8;
 }
 
 /* Dashboard */
@@ -274,7 +299,7 @@ body.dark .alerta-tarefas-dia {
     padding: 24px 20px 16px 20px;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.10);
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -314,14 +339,12 @@ canvas {
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     margin: 0 auto;
-    max-width: 1400px; /* AJUSTE para alargar! */
+    max-width: 1400px;
 }
-
-/* Diminui e alinha à esquerda fonte dos eventos e cabeçalho */
 #calendar .fc-event-title,
 #calendar .fc-event-time,
 #calendar .fc-event {
-    font-size: 0.75rem !important;
+    font-size: 0.95rem !important;
     text-align: left !important;
     justify-content: flex-start !important;
 }
@@ -330,6 +353,11 @@ canvas {
     font-size: 0.90rem !important;
     text-align: left !important;
 }
+/* Cores dos eventos */
+#calendar .fc-event.urgente { background: #e74c3c !important; border-color: #e74c3c !important; }
+#calendar .fc-event.recorrente { background: #2980ef !important; border-color: #2980ef !important; }
+#calendar .fc-event.extra { background: #ffc107 !important; border-color: #ffc107 !important; }
+#calendar .fc-event.realizado { background: #22b573 !important; border-color: #22b573 !important; }
 
 /* Tabela de atividades com ações */
 table {
@@ -378,6 +406,13 @@ table th {
 }
 .acao-btn.excluir:hover {
     background: #b92b19;
+}
+.acao-btn.senha {
+    background: #6c63ff;
+    color: #fff;
+}
+.acao-btn.senha:hover {
+    background: #352ad8;
 }
 .acao-btn.desabilitado {
     background: #d2dae3;
@@ -453,7 +488,7 @@ table th {
     margin: 10% auto;
     padding: 26px 30px 19px 30px;
     border: 1px solid #dae7fa;
-    width: 420px;
+    width: 440px;
     border-radius: 12px;
     box-shadow: 0 6px 22px rgba(10,73,167,0.13);
     position: relative;
@@ -474,13 +509,20 @@ table th {
 
 /* Inputs nos modais */
 .modal-content input[type="date"],
-.modal-content input[type="text"] {
+.modal-content input[type="text"],
+.modal-content textarea,
+.modal-content select {
     width: 100%;
-    padding: 8px;
+    padding: 10px 9px;
     border-radius: 6px;
     border: 1px solid #bcd7fc;
-    margin-bottom: 10px;
-    font-size: 1.02rem;
+    margin-bottom: 12px;
+    font-size: 1.07rem;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+.modal-content textarea {
+    min-height: 62px;
+    resize: vertical;
 }
 
 /* Splash */
@@ -497,7 +539,6 @@ table th {
     align-items: center;
     transition: opacity 0.33s;
 }
-
 #splash img {
     width: 180px;
     filter: drop-shadow(0 3px 22px #dbe8ff);
@@ -529,7 +570,7 @@ footer {
 }
 
 /* Responsivo */
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     .dashboard, #calendar {
         max-width: 97vw;
     }
@@ -606,6 +647,7 @@ footer {
     }
 }
 
+/* DARK MODE */
 body.dark {
     background-color: #181e28;
 }
@@ -667,37 +709,6 @@ body.dark .input-upload {
     color: #fff;
 }
 body.dark .card-filtro select {
-    background: #232d44;
-    color: #fff;
-    border-color: #355ca8;
-}
-/* Destaca a cor da legenda do tipo no calendário */
-#calendar .fc-event.urgente {
-    background: #e74c3c !important;
-    border-color: #e74c3c !important;
-}
-#calendar .fc-event.recorrente {
-    background: #2980ef !important;
-    border-color: #2980ef !important;
-}
-#calendar .fc-event.extra {
-    background: #22b573 !important;
-    border-color: #22b573 !important;
-}
-.select-tipo-atividade {
-    width: 100%;
-    padding: 12px 8px;
-    border-radius: 7px;
-    font-size: 1.13rem;
-    margin-top: 3px;
-    margin-bottom: 12px;
-    border: 1.5px solid #bcd7fc;
-    background: #f7fbff;
-    font-weight: 600;
-    color: #243250;
-}
-
-body.dark .select-tipo-atividade {
     background: #232d44;
     color: #fff;
     border-color: #355ca8;

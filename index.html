@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Painel de Atividades</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- FONTES OSWALD & ROBOTO -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Roboto:wght@700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
@@ -30,8 +32,9 @@
 <header style="display:none;">
     <div class="header-content">
         <img src="logo.png" class="logo" alt="Nordil Logo">
-        <h1>Acompanhamento de Atividades</h1>
+        <h1>Painel de Atividades</h1>
         <span id="usuarioLogado" class="usuario-logado"></span>
+        <span id="departamentoLogado" class="departamento-logado"></span>
         <button id="btnAjuda" title="Instruções" class="btn-header">❓</button>
         <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
         <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
@@ -73,7 +76,11 @@
                 </span>
                 <span><b>Filtrar Atividades</b></span>
             </div>
-            <label for="responsavelSelect">Responsável:</label>
+            <label for="departamentoSelect">Departamento:</label>
+            <select id="departamentoSelect" onchange="filtrarPorDepartamento()">
+                <option value="todos">Todos</option>
+            </select>
+            <label for="responsavelSelect" style="margin-top: 12px;">Responsável:</label>
             <select id="responsavelSelect" onchange="filtrarPorResponsavel()">
                 <option value="todos">Todos</option>
             </select>
@@ -82,6 +89,7 @@
     <div id="calendar"></div>
 </section>
 
+<!-- Dashboard -->
 <section id="aba-dashboard" style="display:none;">
     <div class="dashboard">
         <div class="cardsResumo">
@@ -100,6 +108,7 @@
             <thead>
                 <tr>
                     <th>Data</th>
+                    <th>Departamento</th>
                     <th>Responsável</th>
                     <th>Atividade</th>
                     <th>Tipo</th>
@@ -112,13 +121,25 @@
     </div>
 </section>
 
+<!-- Usuários -->
 <section id="aba-usuarios" style="display:none;">
     <h2>Gerenciar Usuários</h2>
     <form id="usuarioForm" autocomplete="off">
         <input type="text" id="novoUsuario" placeholder="Usuário" required>
         <input type="password" id="novaSenha" placeholder="Senha" required>
+        <input type="email" id="novoEmail" placeholder="E-mail (opcional)">
+        <select id="novoDepartamento" required>
+            <option value="">Selecione o Departamento</option>
+            <option value="DP">DP</option>
+            <option value="Comercial">Comercial</option>
+            <option value="Financeiro">Financeiro</option>
+            <option value="TI">TI</option>
+            <option value="Compras">Compras</option>
+            <option value="Outros">Outros</option>
+        </select>
         <select id="novoTipo">
             <option value="comum">Comum</option>
+            <option value="gestor">Gestor</option>
             <option value="admin">Admin</option>
         </select>
         <button type="submit">Adicionar</button>
@@ -128,7 +149,10 @@
         <thead>
             <tr>
                 <th>Usuário</th>
+                <th>E-mail</th>
+                <th>Departamento</th>
                 <th>Tipo</th>
+                <th>Senha</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -136,6 +160,7 @@
     </table>
 </section>
 
+<!-- Logs de Exclusão (admin) -->
 <section id="aba-logs" style="display:none;">
     <h2>Logs de Exclusão</h2>
     <table id="tabelaLogs">
@@ -168,13 +193,16 @@
             <label>Atividade:<br>
                 <input type="text" id="novaAtividade" required>
             </label><br>
-            <label>Tipo:<br>
+            <label>Tipo da Atividade:<br>
                 <select id="novoTipoAtividade" required class="select-tipo-atividade">
-        <option value="urgente">🔴 Urgente</option>
-        <option value="recorrente">🔵 Recorrente</option>
-        <option value="extra">🟢 Extra</option>
+                    <option value="urgente">🔴 Urgente</option>
+                    <option value="recorrente">🔵 Recorrente</option>
+                    <option value="extra">🟡 Extra</option>
                 </select>
             </label><br>
+            <label>Descrição (opcional):<br>
+                <textarea id="novaDescricao" rows="3"></textarea>
+            </label>
             <button type="submit" class="btn-adicionar" style="margin-top:14px;width:100%;">Salvar</button>
         </form>
         <p id="msgAdicionarAtividade" style="color:#2ecc71; margin-top:6px;"></p>
@@ -198,13 +226,16 @@
             <label>Atividade:<br>
                 <input type="text" id="editarAtividade" required>
             </label><br>
-            <label>Tipo:<br>
-                 <select id="editarTipoAtividade" required class="select-tipo-atividade">
-        <option value="urgente">🔴 Urgente</option>
-        <option value="recorrente">🔵 Recorrente</option>
-        <option value="extra">🟢 Extra</option>
+            <label>Tipo da Atividade:<br>
+                <select id="editarTipoAtividade" required class="select-tipo-atividade">
+                    <option value="urgente">🔴 Urgente</option>
+                    <option value="recorrente">🔵 Recorrente</option>
+                    <option value="extra">🟡 Extra</option>
                 </select>
             </label><br>
+            <label>Descrição (opcional):<br>
+                <textarea id="editarDescricao" rows="3"></textarea>
+            </label>
             <button type="submit" class="btn-adicionar" style="margin-top:14px;width:100%;">Salvar Alterações</button>
         </form>
         <p id="msgEditarAtividade" style="color:#2ecc71; margin-top:6px;"></p>
@@ -231,9 +262,11 @@
         <h3 style="margin-bottom: 22px;">Detalhes da Atividade</h3>
         <div class="atividade-info">
             <div><strong>Data:</strong> <span id="modalData"></span></div>
+            <div><strong>Departamento:</strong> <span id="modalDepartamento"></span></div>
             <div><strong>Responsável:</strong> <span id="modalResponsavel"></span></div>
             <div><strong>Atividade:</strong> <span id="modalAtv"></span></div>
             <div><strong>Tipo:</strong> <span id="modalTipoAtv"></span></div>
+            <div><strong>Descrição:</strong> <span id="modalDescricao"></span></div>
         </div>
         <div class="modal-buttons">
             <button class="btn-success" onclick="marcarStatusModal(true)">Marcar como Realizado</button>
@@ -261,8 +294,8 @@
             <li><b>Calendário:</b> Clique em um dia para ver/editar atividades.</li>
             <li><b>Upload CSV:</b> Importe atividades em massa pelo arquivo.</li>
             <li><b>Dashboard:</b> Veja gráficos e status de execução.</li>
-            <li><b>Usuários:</b> (Apenas admin) Cadastre, edite ou remova acessos.</li>
-            <li><b>Filtros:</b> Selecione um responsável para filtrar as atividades.</li>
+            <li><b>Usuários:</b> (Apenas admin/gestor) Cadastre, edite ou remova acessos.</li>
+            <li><b>Filtros:</b> Selecione departamento e responsável para filtrar as atividades.</li>
             <li><b>Tema:</b> Use 🌙/☀️ para alternar entre claro e escuro.</li>
             <li><b>Sair:</b> Clique em "Sair" ou pressione <b>ESC</b> para sair.</li>
         </ul>

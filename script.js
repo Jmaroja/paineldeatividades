@@ -21,7 +21,8 @@ function fazerLogin() {
         if (doc.exists && doc.data().senha === senha) {
             sessionStorage.setItem('usuario', usuario);
             sessionStorage.setItem('tipo', doc.data().tipo);
-            exibirSistema(usuario, doc.data().tipo);
+            sessionStorage.setItem('departamento', doc.data().departamento || '');
+            exibirSistema(usuario, doc.data().tipo, doc.data().departamento || '');
         } else {
             erroLogin.textContent = 'Usuário ou senha inválidos.';
         }
@@ -31,7 +32,7 @@ function fazerLogin() {
 }
 
 // EXIBE O SISTEMA PÓS-LOGIN (com splash pós-login)
-function exibirSistema(usuario, tipo) {
+function exibirSistema(usuario, tipo, departamento) {
     document.getElementById('splash').style.display = '';
     setTimeout(function () {
         document.getElementById('login').style.display = 'none';
@@ -43,11 +44,16 @@ function exibirSistema(usuario, tipo) {
         document.getElementById('aba-logs').style.display = 'none';
         document.querySelector('footer').style.display = '';
         document.getElementById('usuarioLogado').textContent = `Usuário: ${usuario}`;
-        document.title = "Dashboard | Acompanhamento de Atividades";
+        document.getElementById('departamentoLogado').textContent = departamento ? `Depto: ${departamento}` : '';
+        document.title = "Dashboard | Painel de Atividades";
         if (tipo === "admin") {
             document.getElementById('btnUsuarios').style.display = '';
             document.getElementById('btnLimparCalendario').style.display = '';
             document.getElementById('btnLogs').style.display = '';
+        } else if (tipo === "gestor") {
+            document.getElementById('btnUsuarios').style.display = '';
+            document.getElementById('btnLimparCalendario').style.display = 'none';
+            document.getElementById('btnLogs').style.display = 'none';
         } else {
             document.getElementById('btnUsuarios').style.display = 'none';
             document.getElementById('btnLimparCalendario').style.display = 'none';
@@ -75,7 +81,7 @@ function fazerLogout() {
     document.getElementById('aba-logs').style.display = 'none';
     document.querySelector('footer').style.display = 'none';
     document.getElementById('login').style.display = '';
-    document.title = "Login | Acompanhamento de Atividades";
+    document.title = "Login | Painel de Atividades";
     document.getElementById('usuario').value = '';
     document.getElementById('senha').value = '';
     document.getElementById('erroLogin').textContent = '';
@@ -90,13 +96,13 @@ window.abrirAba = function (aba) {
     document.getElementById('btn' + capitalize(aba)).classList.add('active');
     if (aba === 'calendario') {
         inicializarCalendario();
-        document.title = "Calendário | Acompanhamento de Atividades";
+        document.title = "Calendário | Painel de Atividades";
     }
-    if (aba === 'dashboard') document.title = "Dashboard | Acompanhamento de Atividades";
-    if (aba === 'usuarios') document.title = "Usuários | Acompanhamento de Atividades";
+    if (aba === 'dashboard') document.title = "Dashboard | Painel de Atividades";
+    if (aba === 'usuarios') document.title = "Usuários | Painel de Atividades";
     if (aba === 'logs') {
         carregarLogsExclusao();
-        document.title = "Logs de Exclusão | Acompanhamento de Atividades";
+        document.title = "Logs de Exclusão | Painel de Atividades";
     }
 };
 
@@ -106,6 +112,7 @@ function marcarAbaAtiva(btnId) {
 }
 
 function capitalize(str) {
+    if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -134,8 +141,9 @@ aplicarTema(temaSalvo);
 (function autoLogin() {
     const usuario = sessionStorage.getItem('usuario');
     const tipo = sessionStorage.getItem('tipo');
+    const departamento = sessionStorage.getItem('departamento');
     if (usuario && tipo) {
-        setTimeout(() => exibirSistema(usuario, tipo), 100);
+        setTimeout(() => exibirSistema(usuario, tipo, departamento), 100);
     }
 })();
 
@@ -144,7 +152,45 @@ let todasAtividades = [];
 let atividadesFiltradas = [];
 let calendar = null;
 
-// BOTÃO LIMPAR CALENDÁRIO (apenas admin)
+// FILTRO DE DEPARTAMENTO
+window.filtrarPorDepartamento = function() {
+    const dep = document.getElementById('departamentoSelect').value;
+    const resp = document.getElementById('responsavelSelect').value;
+    if (dep === 'todos') {
+        atividadesFiltradas = [...todasAtividades];
+    } else {
+        atividadesFiltradas = todasAtividades.filter(a => (a.departamento || '') === dep);
+    }
+    // Depois, aplica filtro de responsável se necessário
+    if (resp !== 'todos') {
+        atividadesFiltradas = atividadesFiltradas.filter(a => a.responsavel === resp);
+    }
+    renderizarTabelaAtividades();
+    atualizarDashboard();
+    renderizarGraficos();
+    inicializarCalendario();
+};
+
+// FILTRAR POR RESPONSÁVEL (dentro do departamento)
+window.filtrarPorResponsavel = function () {
+    const dep = document.getElementById('departamentoSelect').value;
+    const resp = document.getElementById('responsavelSelect').value;
+    if (dep === 'todos' && resp === 'todos') {
+        atividadesFiltradas = [...todasAtividades];
+    } else if (dep !== 'todos' && resp === 'todos') {
+        atividadesFiltradas = todasAtividades.filter(a => (a.departamento || '') === dep);
+    } else if (dep === 'todos' && resp !== 'todos') {
+        atividadesFiltradas = todasAtividades.filter(a => a.responsavel === resp);
+    } else {
+        atividadesFiltradas = todasAtividades.filter(a => (a.departamento || '') === dep && a.responsavel === resp);
+    }
+    renderizarTabelaAtividades();
+    atualizarDashboard();
+    renderizarGraficos();
+    inicializarCalendario();
+};
+
+// BOTÃO LIMPAR CALENDÁRIO (admin)
 document.getElementById('btnLimparCalendario').onclick = async function() {
     if (!confirm('Tem certeza que deseja APAGAR TODAS as atividades do calendário? Esta ação NÃO pode ser desfeita.')) return;
     const snapshot = await db.collection('atividades').get();
@@ -155,15 +201,16 @@ document.getElementById('btnLimparCalendario').onclick = async function() {
     carregarAtividades();
 };
 
-// ADICIONAR ATIVIDADE (botão + modal) -- melhorado!
+// ADICIONAR ATIVIDADE (botão + modal)
 document.getElementById('btnAdicionarAtividade').onclick = function() {
     const usuario = sessionStorage.getItem('usuario') || "";
     const tipo = sessionStorage.getItem('tipo');
     document.getElementById('novaData').value = new Date().toISOString().slice(0, 10);
     document.getElementById('novaAtividade').value = "";
     document.getElementById('novoTipoAtividade').value = "urgente";
+    document.getElementById('novaDescricao').value = "";
     document.getElementById('msgAdicionarAtividade').textContent = "";
-    if (tipo === "admin") {
+    if (tipo === "admin" || tipo === "gestor") {
         document.getElementById('divResponsavelAdicionar').style.display = '';
         document.getElementById('novoResponsavel').value = "";
     } else {
@@ -183,16 +230,21 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function(e) {
     const tipoAtv = document.getElementById('novoTipoAtividade').value;
     let responsavel = document.getElementById('novoResponsavel').value.trim();
     let atividade = document.getElementById('novaAtividade').value.trim();
-
+    let descricao = document.getElementById('novaDescricao').value.trim();
+    let departamento = sessionStorage.getItem('tipo') === "admin" || sessionStorage.getItem('tipo') === "gestor"
+        ? (usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : sessionStorage.getItem('departamento'))
+        : sessionStorage.getItem('departamento');
     if (!data || !responsavel || !atividade) {
-        document.getElementById('msgAdicionarAtividade').textContent = "Preencha todos os campos.";
+        document.getElementById('msgAdicionarAtividade').textContent = "Preencha todos os campos obrigatórios.";
         return;
     }
     await db.collection('atividades').add({
         data: data,
         responsavel: responsavel,
-        atividade: atividade, // Permite acento normalmente!
+        atividade: atividade,
         tipo: tipoAtv,
+        descricao: descricao,
+        departamento: departamento || '',
         status: 'pendente'
     });
     document.getElementById('msgAdicionarAtividade').textContent = "Atividade adicionada com sucesso!";
@@ -200,6 +252,26 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function(e) {
         fecharModalAdicionarAtividade();
         carregarAtividades();
     }, 900);
+};
+
+let usuariosMap = {};
+function listarUsuariosMap() {
+    // Auxiliar para departamento-responsável
+    db.collection('usuarios').get().then(snapshot => {
+        usuariosMap = {};
+        snapshot.forEach(doc => {
+            usuariosMap[doc.id] = doc.data();
+        });
+    });
+}
+listarUsuariosMap();
+
+window.onload = function () {
+    setTimeout(function () {
+        document.getElementById('splash').style.display = 'none';
+    }, 1200);
+    document.getElementById('splash').style.display = '';
+    listarUsuariosMap();
 };
 // IMPORTAÇÃO CSV EM LOTE (batchs de 400)
 window.processCSV = function () {
@@ -210,14 +282,16 @@ window.processCSV = function () {
         const lines = e.target.result.split('\n');
         let atividades = [];
         for (let line of lines) {
-            const [data, responsavel, atividade, tipo] = line.split(',');
+            const [data, responsavel, atividade, tipo, descricao] = line.split(',');
             if (data && responsavel && atividade) {
                 atividades.push({
                     data: data.trim(),
                     responsavel: responsavel.trim(),
                     atividade: atividade.trim(),
                     tipo: tipo ? tipo.trim() : "urgente",
-                    status: 'pendente'
+                    descricao: descricao ? descricao.trim() : "",
+                    status: 'pendente',
+                    departamento: usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : ''
                 });
             }
         }
@@ -244,7 +318,17 @@ function carregarAtividades() {
             atividade.id = doc.id;
             todasAtividades.push(atividade);
         });
+        // FILTRO MULTI-SETOR: aplica restrição para gestor e comum
+        const tipo = sessionStorage.getItem('tipo');
+        const departamento = sessionStorage.getItem('departamento');
+        if (tipo === "gestor") {
+            todasAtividades = todasAtividades.filter(a => (a.departamento || '') === departamento);
+        } else if (tipo === "comum") {
+            const usuario = sessionStorage.getItem('usuario');
+            todasAtividades = todasAtividades.filter(a => a.responsavel === usuario);
+        }
         atividadesFiltradas = [...todasAtividades];
+        preencherSelectDepartamento();
         preencherSelectResponsavel();
         renderizarTabelaAtividades();
         atualizarDashboard();
@@ -254,12 +338,29 @@ function carregarAtividades() {
     });
 }
 
+function preencherSelectDepartamento() {
+    const select = document.getElementById('departamentoSelect');
+    const departamentos = [...new Set(todasAtividades.map(a => a.departamento || 'Outros'))];
+    select.innerHTML = '<option value="todos">Todos</option>';
+    departamentos.forEach(dep => {
+        select.innerHTML += `<option value="${dep}">${dep}</option>`;
+    });
+}
+function preencherSelectResponsavel() {
+    const select = document.getElementById('responsavelSelect');
+    const responsaveis = [...new Set(todasAtividades.map(a => a.responsavel))];
+    select.innerHTML = '<option value="todos">Todos</option>';
+    responsaveis.forEach(r => {
+        select.innerHTML += `<option value="${r}">${r}</option>`;
+    });
+}
+
 // BANNER DE ALERTA DE TAREFAS DO DIA
 function exibirAlertaTarefasDia() {
     const usuario = sessionStorage.getItem('usuario');
     const tipo = sessionStorage.getItem('tipo');
     const alerta = document.getElementById('alertaTarefasDia');
-    if (!usuario || tipo === 'admin') {
+    if (!usuario || tipo === 'admin' || tipo === 'gestor') {
         alerta.style.display = 'none';
         return;
     }
@@ -278,7 +379,7 @@ function exibirAlertaTarefasDia() {
     }
 }
 
-// FULLCALENDAR COM DRAG & DROP COLORIDO POR TIPO
+// CALENDÁRIO COM CORES E TOOLTIP
 function inicializarCalendario() {
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
@@ -300,14 +401,22 @@ function inicializarCalendario() {
         editable: true,
         events: todasAtividades.map(a => ({
             id: a.id,
-            title: a.atividade + ' (' + a.responsavel + ')',
+            title: a.atividade,
             start: a.data,
-            color: a.tipo === "urgente" ? "#e74c3c" : a.tipo === "recorrente" ? "#2980ef" : "#22b573",
-            classNames: [a.tipo || 'urgente'],
+            color: a.status === "realizado"
+                ? "#22b573" // Verde para realizado
+                : a.tipo === "urgente" ? "#e74c3c"
+                : a.tipo === "recorrente" ? "#2980ef"
+                : "#ffc107", // Amarelo escuro para extra
+            classNames: [
+                a.status === "realizado" ? "realizado" : (a.tipo || 'urgente')
+            ],
             extendedProps: {
                 responsavel: a.responsavel,
-                status: a.status,
-                tipo: a.tipo
+                departamento: a.departamento || "",
+                tipo: a.tipo,
+                descricao: a.descricao || "",
+                status: a.status
             }
         })),
         eventClick: function(info) {
@@ -328,6 +437,15 @@ function inicializarCalendario() {
                 alert("Você só pode mover suas próprias atividades!");
             }
         },
+        eventDidMount: function(info) {
+            // Tooltip igual Google: Atividade, Data, Descrição
+            const descricao = info.event.extendedProps.descricao || '';
+            const atividade = info.event.title;
+            const data = info.event.start.toLocaleDateString();
+            let txt = `${atividade}\nData: ${data}`;
+            if (descricao) txt += `\nDescrição: ${descricao}`;
+            info.el.title = txt;
+        },
         buttonText: {
             today:    'Hoje',
             month:    'Mês',
@@ -347,36 +465,12 @@ function inicializarCalendario() {
 function abrirModalPelaData(data, atividadeTitulo) {
     const atv = todasAtividades.find(a =>
         a.data === data &&
-        atividadeTitulo.includes(a.atividade)
+        atividadeTitulo === a.atividade
     );
     if (atv) {
         window.abrirModal(atv.id);
     }
 }
-
-// SELECT RESPONSÁVEL
-function preencherSelectResponsavel() {
-    const select = document.getElementById('responsavelSelect');
-    const responsaveis = [...new Set(todasAtividades.map(a => a.responsavel))];
-    select.innerHTML = '<option value="todos">Todos</option>';
-    responsaveis.forEach(r => {
-        select.innerHTML += `<option value="${r}">${r}</option>`;
-    });
-}
-
-// FILTRAR POR RESPONSÁVEL
-window.filtrarPorResponsavel = function () {
-    const filtro = document.getElementById('responsavelSelect').value;
-    if (filtro === 'todos') {
-        atividadesFiltradas = [...todasAtividades];
-    } else {
-        atividadesFiltradas = todasAtividades.filter(a => a.responsavel === filtro);
-    }
-    renderizarTabelaAtividades();
-    atualizarDashboard();
-    renderizarGraficos();
-    inicializarCalendario();
-};
 
 // RENDERIZAR TABELA COM AÇÕES E TIPO
 function renderizarTabelaAtividades() {
@@ -385,10 +479,11 @@ function renderizarTabelaAtividades() {
     const tbody = document.getElementById('tabelaAtividades').querySelector('tbody');
     tbody.innerHTML = '';
     atividadesFiltradas.forEach(a => {
-        const podeEditar = tipo === 'admin' || a.responsavel === usuario;
+        const podeEditar = tipo === 'admin' || tipo === "gestor" || a.responsavel === usuario;
         tbody.innerHTML += `
             <tr>
                 <td>${a.data}</td>
+                <td>${a.departamento || ''}</td>
                 <td>${a.responsavel}</td>
                 <td>${a.atividade}</td>
                 <td>${a.tipo ? capitalize(a.tipo) : 'Urgente'}</td>
@@ -414,9 +509,11 @@ let atividadeSelecionada = null;
 window.abrirModal = function (id) {
     atividadeSelecionada = todasAtividades.find(a => a.id === id);
     document.getElementById('modalData').textContent = atividadeSelecionada.data;
+    document.getElementById('modalDepartamento').textContent = atividadeSelecionada.departamento || '';
     document.getElementById('modalResponsavel').textContent = atividadeSelecionada.responsavel;
     document.getElementById('modalAtv').textContent = atividadeSelecionada.atividade;
     document.getElementById('modalTipoAtv').textContent = atividadeSelecionada.tipo ? capitalize(atividadeSelecionada.tipo) : 'Urgente';
+    document.getElementById('modalDescricao').textContent = atividadeSelecionada.descricao || '';
     document.getElementById('selectMotivo').style.display = 'none';
     document.getElementById('modalAtividade').style.display = 'block';
 }
@@ -440,7 +537,7 @@ window.marcarStatusModal = function (realizado) {
     });
 }
 
-// MODAL EDITAR ATIVIDADE – atualizado com tipo e responsavel oculto p/ usuário
+// MODAL EDITAR ATIVIDADE
 window.abrirModalEditarAtividade = function(id) {
     const atv = todasAtividades.find(a => a.id === id);
     if (!atv) return;
@@ -448,9 +545,10 @@ window.abrirModalEditarAtividade = function(id) {
     document.getElementById('editarData').value = atv.data;
     document.getElementById('editarAtividade').value = atv.atividade;
     document.getElementById('editarTipoAtividade').value = atv.tipo || "urgente";
+    document.getElementById('editarDescricao').value = atv.descricao || '';
     document.getElementById('msgEditarAtividade').textContent = "";
     const tipoSessao = sessionStorage.getItem('tipo');
-    if (tipoSessao === "admin") {
+    if (tipoSessao === "admin" || tipoSessao === "gestor") {
         document.getElementById('divResponsavelEditar').style.display = '';
         document.getElementById('editarResponsavel').value = atv.responsavel;
     } else {
@@ -471,16 +569,18 @@ document.getElementById('formEditarAtividade').onsubmit = async function(e) {
     const tipoAtv = document.getElementById('editarTipoAtividade').value;
     let responsavel = document.getElementById('editarResponsavel').value.trim();
     let atividade = document.getElementById('editarAtividade').value.trim();
+    let descricao = document.getElementById('editarDescricao').value.trim();
 
     if (!data || !responsavel || !atividade) {
-        document.getElementById('msgEditarAtividade').textContent = "Preencha todos os campos.";
+        document.getElementById('msgEditarAtividade').textContent = "Preencha todos os campos obrigatórios.";
         return;
     }
     await db.collection('atividades').doc(id).update({
         data: data,
         responsavel: responsavel,
         atividade: atividade,
-        tipo: tipoAtv
+        tipo: tipoAtv,
+        descricao: descricao
     });
     document.getElementById('msgEditarAtividade').textContent = "Alteração salva!";
     setTimeout(() => {
@@ -518,6 +618,7 @@ document.getElementById('btnConfirmarExcluir').onclick = async function() {
         motivo: motivo,
         atividade: {
             data: atv.data,
+            departamento: atv.departamento || '',
             responsavel: atv.responsavel,
             atividade: atv.atividade,
             tipo: atv.tipo || 'urgente',
@@ -544,7 +645,7 @@ function carregarLogsExclusao() {
                     <td>${l.datahora.replace('T',' ').replace('.000Z','')}</td>
                     <td>${l.quem}</td>
                     <td>${l.motivo}</td>
-                    <td>${l.atividade.data} - ${l.atividade.responsavel} - ${l.atividade.atividade} [${capitalize(l.atividade.tipo)}]</td>
+                    <td>${l.atividade.data} - ${l.atividade.departamento || ''} - ${l.atividade.responsavel} - ${l.atividade.atividade} [${capitalize(l.atividade.tipo)}]</td>
                 </tr>
             `;
         });
@@ -623,9 +724,9 @@ function renderizarGraficos() {
 
 // EXPORTAR CSV
 window.exportarResumo = function () {
-    let csv = 'Data,Responsável,Atividade,Tipo,Status,Motivo\n';
+    let csv = 'Data,Departamento,Responsável,Atividade,Tipo,Status,Motivo,Descrição\n';
     atividadesFiltradas.forEach(a => {
-        csv += `${a.data},${a.responsavel},${a.atividade},${a.tipo || ''},${statusFormatado(a.status)},${a.motivo || ''}\n`;
+        csv += `${a.data},${a.departamento || ''},${a.responsavel},${a.atividade},${a.tipo || ''},${statusFormatado(a.status)},${a.motivo || ''},${a.descricao || ''}\n`;
     });
     const blob = new Blob([csv], {type: 'text/csv'});
     const url = window.URL.createObjectURL(blob);
@@ -637,7 +738,7 @@ window.exportarResumo = function () {
     document.body.removeChild(a);
 }
 
-// USUÁRIOS (ADMIN)
+// USUÁRIOS (ADMIN / GESTOR)
 document.getElementById('usuarioForm').addEventListener('submit', function(event) {
     event.preventDefault();
     adicionarUsuario();
@@ -646,14 +747,18 @@ document.getElementById('usuarioForm').addEventListener('submit', function(event
 function adicionarUsuario() {
     const usuario = document.getElementById('novoUsuario').value.trim();
     const senha = document.getElementById('novaSenha').value;
+    const email = document.getElementById('novoEmail').value.trim();
+    const departamento = document.getElementById('novoDepartamento').value;
     const tipo = document.getElementById('novoTipo').value;
-    if (!usuario || !senha) {
-        alert('Preencha todos os campos!');
+    if (!usuario || !senha || !departamento) {
+        alert('Preencha todos os campos obrigatórios!');
         return;
     }
     db.collection('usuarios').doc(usuario).set({
         senha: senha,
-        tipo: tipo
+        tipo: tipo,
+        departamento: departamento,
+        email: email
     }).then(() => {
         alert('Usuário adicionado!');
         listarUsuarios();
@@ -665,14 +770,24 @@ function adicionarUsuario() {
 
 function listarUsuarios() {
     db.collection('usuarios').get().then(snapshot => {
+        const tipoSessao = sessionStorage.getItem('tipo');
+        const depSessao = sessionStorage.getItem('departamento');
         const tbody = document.getElementById('tabelaUsuarios').querySelector('tbody');
         tbody.innerHTML = '';
         snapshot.forEach(doc => {
             const u = doc.data();
+            // Restrição gestor: só vê seu departamento
+            if (tipoSessao === 'gestor' && u.departamento !== depSessao) return;
             tbody.innerHTML += `
                 <tr>
                     <td>${doc.id}</td>
+                    <td>${u.email || '-'}</td>
+                    <td>${u.departamento || '-'}</td>
                     <td>${u.tipo}</td>
+                    <td>
+                        <input type="text" id="senha-${doc.id}" value="${u.senha}" readonly style="width:90px;">
+                        <button class="acao-btn senha" onclick="editarSenhaUsuario('${doc.id}')">Alterar</button>
+                    </td>
                     <td>
                         <button onclick="removerUsuario('${doc.id}')">Remover</button>
                     </td>
@@ -681,6 +796,18 @@ function listarUsuarios() {
         });
     });
 }
+
+window.editarSenhaUsuario = function(usuario) {
+    const novaSenha = prompt('Nova senha para o usuário:');
+    if (!novaSenha) return;
+    db.collection('usuarios').doc(usuario).update({
+        senha: novaSenha
+    }).then(() => {
+        alert('Senha alterada!');
+        listarUsuarios();
+    });
+};
+
 window.removerUsuario = function(usuario) {
     if (confirm(`Remover usuário ${usuario}?`)) {
         db.collection('usuarios').doc(usuario).delete().then(() => {
@@ -690,3 +817,13 @@ window.removerUsuario = function(usuario) {
     }
 }
 
+// ESC só fecha modais (NÃO desloga)
+document.addEventListener('keydown', function(e) {
+    if (e.key === "Escape") {
+        fecharModal();
+        fecharModalAdicionarAtividade();
+        fecharModalEditarAtividade();
+        fecharModalExcluirAtividade();
+        fecharModalAjuda();
+    }
+});
