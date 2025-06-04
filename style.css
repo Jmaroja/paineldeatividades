@@ -671,3 +671,16 @@ body.dark .card-filtro select {
     color: #fff;
     border-color: #355ca8;
 }
+/* Destaca a cor da legenda do tipo no calendário */
+#calendar .fc-event.urgente {
+    background: #e74c3c !important;
+    border-color: #e74c3c !important;
+}
+#calendar .fc-event.recorrente {
+    background: #2980ef !important;
+    border-color: #2980ef !important;
+}
+#calendar .fc-event.extra {
+    background: #22b573 !important;
+    border-color: #22b573 !important;
+}

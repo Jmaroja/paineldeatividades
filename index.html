@@ -13,12 +13,10 @@
 </head>
 <body>
 
-<!-- Splash -->
 <div id="splash" style="display: none;">
     <img src="logo.png" class="logo" alt="Nordil Logo">
 </div>
 
-<!-- Login -->
 <div id="login">
     <h2>Login</h2>
     <form id="loginForm" autocomplete="off">
@@ -29,7 +27,6 @@
     <p id="erroLogin"></p>
 </div>
 
-<!-- Header -->
 <header style="display:none;">
     <div class="header-content">
         <img src="logo.png" class="logo" alt="Nordil Logo">
@@ -41,7 +38,6 @@
     </div>
 </header>
 
-<!-- Banner de alerta do dia -->
 <div id="alertaTarefasDia" class="alerta-tarefas-dia" style="display: none;"></div>
 
 <div class="nav-tabs" style="display:none;">
@@ -86,7 +82,6 @@
     <div id="calendar"></div>
 </section>
 
-<!-- Dashboard -->
 <section id="aba-dashboard" style="display:none;">
     <div class="dashboard">
         <div class="cardsResumo">
@@ -107,18 +102,16 @@
                     <th>Data</th>
                     <th>Responsável</th>
                     <th>Atividade</th>
+                    <th>Tipo</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Preenchido pelo JS -->
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 </section>
 
-<!-- Usuários -->
 <section id="aba-usuarios" style="display:none;">
     <h2>Gerenciar Usuários</h2>
     <form id="usuarioForm" autocomplete="off">
@@ -143,7 +136,6 @@
     </table>
 </section>
 
-<!-- Logs de Exclusão (admin) -->
 <section id="aba-logs" style="display:none;">
     <h2>Logs de Exclusão</h2>
     <table id="tabelaLogs">
@@ -168,11 +160,20 @@
             <label>Data:<br>
                 <input type="date" id="novaData" required>
             </label><br>
-            <label>Responsável:<br>
-                <input type="text" id="novoResponsavel" required>
-            </label><br>
+            <div id="divResponsavelAdicionar">
+                <label>Responsável:<br>
+                    <input type="text" id="novoResponsavel">
+                </label><br>
+            </div>
             <label>Atividade:<br>
                 <input type="text" id="novaAtividade" required>
+            </label><br>
+            <label>Tipo:<br>
+                <select id="novoTipoAtividade" required>
+                    <option value="urgente">Urgente</option>
+                    <option value="recorrente">Recorrente (diário)</option>
+                    <option value="extra">Extra</option>
+                </select>
             </label><br>
             <button type="submit" class="btn-adicionar" style="margin-top:14px;width:100%;">Salvar</button>
         </form>
@@ -189,11 +190,20 @@
             <label>Data:<br>
                 <input type="date" id="editarData" required>
             </label><br>
-            <label>Responsável:<br>
-                <input type="text" id="editarResponsavel" required>
-            </label><br>
+            <div id="divResponsavelEditar">
+                <label>Responsável:<br>
+                    <input type="text" id="editarResponsavel">
+                </label><br>
+            </div>
             <label>Atividade:<br>
                 <input type="text" id="editarAtividade" required>
+            </label><br>
+            <label>Tipo:<br>
+                <select id="editarTipoAtividade" required>
+                    <option value="urgente">Urgente</option>
+                    <option value="recorrente">Recorrente (diário)</option>
+                    <option value="extra">Extra</option>
+                </select>
             </label><br>
             <button type="submit" class="btn-adicionar" style="margin-top:14px;width:100%;">Salvar Alterações</button>
         </form>
@@ -223,6 +233,7 @@
             <div><strong>Data:</strong> <span id="modalData"></span></div>
             <div><strong>Responsável:</strong> <span id="modalResponsavel"></span></div>
             <div><strong>Atividade:</strong> <span id="modalAtv"></span></div>
+            <div><strong>Tipo:</strong> <span id="modalTipoAtv"></span></div>
         </div>
         <div class="modal-buttons">
             <button class="btn-success" onclick="marcarStatusModal(true)">Marcar como Realizado</button>
@@ -259,7 +270,6 @@
     </div>
 </div>
 
-<!-- Rodapé -->
 <footer style="display:none;">
     <div class="footer-content">
         <img src="logo.png" alt="Nordil" class="logo-footer">
