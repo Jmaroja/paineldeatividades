@@ -684,3 +684,21 @@ body.dark .card-filtro select {
     background: #22b573 !important;
     border-color: #22b573 !important;
 }
+.select-tipo-atividade {
+    width: 100%;
+    padding: 12px 8px;
+    border-radius: 7px;
+    font-size: 1.13rem;
+    margin-top: 3px;
+    margin-bottom: 12px;
+    border: 1.5px solid #bcd7fc;
+    background: #f7fbff;
+    font-weight: 600;
+    color: #243250;
+}
+
+body.dark .select-tipo-atividade {
+    background: #232d44;
+    color: #fff;
+    border-color: #355ca8;
+}
