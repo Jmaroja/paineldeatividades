@@ -460,7 +460,7 @@ function renderizarTabelaAtividades() {
         const podeEditar = tipo === 'admin' || tipo === "gestor" || a.responsavel === usuario;
         tbody.innerHTML += `
             <tr>
-                <td>${a.data}</td>
+                <td>${formatarDataBrasileira(a.data)}</td>
                 <td>${a.departamento || ''}</td>
                 <td>${a.responsavel}</td>
                 <td>${a.atividade}</td>
