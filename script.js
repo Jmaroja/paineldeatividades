@@ -1,3 +1,17 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyBndhAbgEbFxCZvTVfkqMH6MTuyzhPTxUo",
+  authDomain: "nordil-atividades.firebaseapp.com",
+  projectId: "nordil-atividades",
+  storageBucket: "nordil-atividades.appspot.com",
+  messagingSenderId: "138660523776",
+  appId: "1:138660523776:web:d47955e6b48401c233cde5"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let chartBarras, chartLinha, chartMotivos; //painel dashs
+
 
 // SPLASH
 window.onload = function () {
@@ -690,11 +704,11 @@ function atualizarDashboard() {
     document.getElementById('percentualConclusao').textContent =
         atividadesFiltradas.length ? Math.round(realizadas / atividadesFiltradas.length * 100) + '%' : '0%';
 }
-let chartBarras, chartLinha, chartMotivos;
+
 function renderizarGraficos() {
     // Barras
     const ctxBarras = document.getElementById('graficoBarras').getContext('2d');
-    if (chartBarras) chartBarras.destroy();
+    if (chartBarras) chartBarras.destroy();chartbarras = null;
     const realizadas = atividadesFiltradas.filter(a => a.status === 'realizado').length;
     const naoRealizadas = atividadesFiltradas.filter(a => a.status === 'naoRealizado').length;
     const pendentes = atividadesFiltradas.filter(a => !a.status || a.status === 'pendente').length;
@@ -710,7 +724,7 @@ function renderizarGraficos() {
     });
     // Linha
     const ctxLinha = document.getElementById('graficoLinha').getContext('2d');
-    if (chartLinha) chartLinha.destroy();
+    if (chartLinha) chartLinha.destroy();chartLinha = null;
     let dadosData = {};
     atividadesFiltradas.forEach(a => {
         if (!dadosData[a.data]) dadosData[a.data] = 0;
@@ -730,7 +744,7 @@ function renderizarGraficos() {
     });
     // Motivos (pizza)
     const ctxMotivos = document.getElementById('graficoMotivos').getContext('2d');
-    if (chartMotivos) chartMotivos.destroy();
+    if (chartMotivos) chartMotivos.destroy();chartMotivos = null;
     let motivos = {};
     atividadesFiltradas.filter(a => a.status === 'naoRealizado').forEach(a => {
         motivos[a.motivo] = (motivos[a.motivo] || 0) + 1;
