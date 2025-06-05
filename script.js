@@ -975,12 +975,7 @@ function fecharModalAjuda() {
     document.getElementById('modalAjuda').style.display = 'none';
 }
 
-    atividadesDoDia.forEach(atv => {
-        if (!agrupado[atv.responsavel]) agrupado[atv.responsavel] = [];
-        agrupado[atv.responsavel].push(atv);
-    });
-
-    let html = '';
+       let html = '';
     for (const responsavel in agrupado) {
         html += `<h3>${responsavel}</h3><ul>`;
         agrupado[responsavel].forEach(a => {

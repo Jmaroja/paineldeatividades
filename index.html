@@ -362,25 +362,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="script.js"></script><!-- Firebase-->
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBndhAbgEbFxCZvTVfkqMH6MTuyzhPTxUo",
-    authDomain: "nordil-atividades.firebaseapp.com",
-    projectId: "nordil-atividades",
-    storageBucket: "nordil-atividades.appspot.com",
-    messagingSenderId: "138660523776",
-    appId: "1:138660523776:web:d47955e6b48401c233cde5"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
 
-  document.getElementById('anoAtual').textContent = new Date().getFullYear();
-  document.getElementById('btnAjuda').onclick = function() {
-      document.getElementById('modalAjuda').style.display = 'block';
-  };
-  window.fecharModalAjuda = function() {
-      document.getElementById('modalAjuda').style.display = 'none';
-  };
 </script>
 </body>
 </html>
