@@ -1,7 +1,4 @@
 
-
-
-
 // SPLASH
 window.onload = function () {
   abrirAba("calendario");
@@ -20,9 +17,6 @@ window.onload = function () {
         });
     }
 };
-
-
-
 // LOGIN FLUXO
 document.getElementById('loginForm').addEventListener('submit', function (event) {
     event.preventDefault();
