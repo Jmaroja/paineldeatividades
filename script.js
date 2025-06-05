@@ -966,3 +966,55 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function(e) {
 function fecharModalAjuda() {
     document.getElementById('modalAjuda').style.display = 'none';
 }
+document.getElementById('btnGerarPDF').onclick = async function () {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const atividadesDoDia = todasAtividades.filter(atv => atv.data === hoje);
+
+    // Agrupar por responsável
+    const agrupado = {};
+    atividadesDoDia.forEach(atv => {
+        if (!agrupado[atv.responsavel]) agrupado[atv.responsavel] = [];
+        agrupado[atv.responsavel].push(atv);
+    });
+
+    // Construir HTML por colaborador
+    let html = '';
+    for (const responsavel in agrupado) {
+        html += `<h3>${responsavel}</h3><ul>`;
+        agrupado[responsavel].forEach(a => {
+            html += `<li><b>${a.atividade}</b> — ${a.tipo} — ${a.status || 'pendente'}</li>`;
+        });
+        html += `</ul><hr>`;
+    }
+
+    document.getElementById('dataResumoPDF').textContent = hoje.split('-').reverse().join('/');
+    document.getElementById('conteudoResumoPDF').innerHTML = html;
+
+    // Capturar imagem do dashboard
+    const dashboard = document.getElementById('dashboardContainer') || document.getElementById('graficoDashboard');
+    const canvas = await html2canvas(dashboard);
+    const imgData = canvas.toDataURL("image/png");
+
+    // Inserir imagem no PDF
+    const img = new Image();
+    img.src = imgData;
+    img.style.maxWidth = "100%";
+    img.style.margin = "10px auto";
+    const imagemDiv = document.getElementById('imagemDashboard');
+    imagemDiv.innerHTML = '';
+    imagemDiv.appendChild(img);
+
+    // Mostrar a div, gerar PDF, depois esconder
+    const resumoDiv = document.getElementById('resumoPDF');
+    resumoDiv.style.display = 'block';
+
+    html2pdf().from(resumoDiv).set({
+        margin: 10,
+        filename: `resumo-${hoje}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).save().then(() => {
+        resumoDiv.style.display = 'none';
+    });
+};
