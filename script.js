@@ -694,8 +694,7 @@ let chartBarras, chartLinha, chartMotivos;
 function renderizarGraficos() {
     // Barras
     const ctxBarras = document.getElementById('graficoBarras').getContext('2d');
-    if (chartBarras) chartBarras.destroy();
-    const realizadas = atividadesFiltradas.filter(a => a.status === 'realizado').length;
+        const realizadas = atividadesFiltradas.filter(a => a.status === 'realizado').length;
     const naoRealizadas = atividadesFiltradas.filter(a => a.status === 'naoRealizado').length;
     const pendentes = atividadesFiltradas.filter(a => !a.status || a.status === 'pendente').length;
     chartBarras = new Chart(ctxBarras, {
