@@ -50,31 +50,46 @@
 <div id="alertaTarefasDia" class="alerta-tarefas-dia" style="display: none;"></div>
 
 <div class="painel-main" style="display:none;">
-    <!-- SIDEBAR LATERAL -->
-    <div class="sidebar">
-        <div class="sidebar-group">
-            <label class="sidebar-label">Upload CSV</label>
-            <input type="file" id="csvFile" class="input-upload">
-            <button class="btn-upload" onclick="processCSV()">Carregar</button>
-        </div>
-        <button id="btnLimparCalendario" class="btn-limpar">🧹 Limpar</button>
-        <button id="btnAdicionarAtividade" class="btn-adicionar">+ Atividade</button>
-        <div class="sidebar-group">
-            <label class="sidebar-label">Departamento</label>
-            <select id="departamentoSelect" onchange="filtrarPorDepartamento()">
-                <option value="todos">Todos</option>
-            </select>
-            <label class="sidebar-label">Responsável</label>
-            <select id="responsavelSelect" onchange="filtrarPorResponsavel()">
-                <option value="todos">Todos</option>
-            </select>
-        </div>
-       <div class="sidebar-group" style="margin-top:40px;">
-    <button id="btnCalendario" onclick="abrirAba('calendario')" class="btn-sidebar-aba">📅 Calendário</button>
-    <button id="btnDashboard" onclick="abrirAba('dashboard')" class="btn-sidebar-aba">📊 Dashboard</button>
-    <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;" class="btn-sidebar-aba">👥 Usuários</button>
-    <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;" class="btn-sidebar-aba">📝 Logs de Exclusão</button>
+<!-- SIDEBAR LATERAL -->
+<div class="sidebar">
+    <div class="sidebar-group">
+        <label class="sidebar-label">Upload CSV</label>
+        <input type="file" id="csvFile" class="input-upload">
+        <button class="btn-upload" onclick="processCSV()">Carregar</button>
+    </div>
+
+    <button id="btnLimparCalendario" class="btn-limpar">🧹 Limpar</button>
+    <button id="btnAdicionarAtividade" class="btn-adicionar">+ Atividade</button>
+
+    <div class="sidebar-group">
+        <label class="sidebar-label">Departamento</label>
+        <select id="departamentoSelect" onchange="filtrarPorDepartamento()">
+            <option value="todos">Todos</option>
+        </select>
+        <label class="sidebar-label">Responsável</label>
+        <select id="responsavelSelect" onchange="filtrarPorResponsavel()">
+            <option value="todos">Todos</option>
+        </select>
+    </div>
+
+    <div class="sidebar-group" style="margin-top:40px;">
+        <button id="btnCalendario" onclick="abrirAba('calendario')" class="btn-sidebar-aba">📅 Calendário</button>
+        <button id="btnDashboard" onclick="abrirAba('dashboard')" class="btn-sidebar-aba">📊 Dashboard</button>
+        <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;" class="btn-sidebar-aba">👥 Usuários</button>
+        <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;" class="btn-sidebar-aba">📝 Logs de Exclusão</button>
+    </div>
+
+    <!-- LEGENDA FIXA NA BASE DA SIDEBAR -->
+    <div id="legendaCores">
+        <b>Legenda:</b>
+        <div><span class="leg-dot urgente"></span> Urgente</div>
+        <div><span class="leg-dot recorrente"></span> Recorrente</div>
+        <div><span class="leg-dot extra"></span> Extra</div>
+        <div><span class="leg-dot realizado"></span> Realizado</div>
+        <div><span class="leg-dot pendente"></span> Pendente</div>
+    </div>
 </div>
+
 <div class="legend-corner legend-bottom" id="legendaCores">
     <b>Legenda:</b>
     <div><span class="leg-dot urgente"></span> Urgente</div>
