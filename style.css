@@ -641,3 +641,6 @@ body.dark .legend-corner.legend-bottom {
 @media (max-width: 700px) {
     .legend-corner.legend-bottom { left: 6px; bottom: 7px; padding: 8px 8px 9px 11px; font-size: 0.98rem;}
 }
+#legendaCores {
+    display: none;
+}
