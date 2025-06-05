@@ -137,6 +137,38 @@ header .logo {
     flex-direction: column;
     gap: 24px;
 }
+#legendaCores {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 10px rgba(10,73,167,0.07);
+    font-size: 0.97rem;
+    margin-top: 14px;
+    line-height: 1.5;
+}
+#legendaCores b {
+    font-size: 1.05em;
+    margin-bottom: 4px;
+    display: block;
+}
+.leg-dot {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+.urgente { background: #e74c3c; }
+.recorrente { background: #2980ef; }
+.extra { background: #ffc107; }
+.realizado { background: #22b573; }
+.pendente { background: #a7a9ad; }
+
+body.dark #legendaCores {
+    background: #232d44;
+    color: #e9efff;
+}
+
 .sidebar-group {
     margin-bottom: 13px;
     display: flex;
