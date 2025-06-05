@@ -351,7 +351,11 @@
         <span>&copy; <span id="anoAtual"></span> Nordil • Painel de Atividades</span>
     </div>
 </footer>
-
+<div id="resumoPDF" style="display:none; padding: 20px; font-family: Arial, sans-serif;">
+    <h2 style="text-align:center;">Resumo do dia - <span id="dataResumoPDF"></span></h2>
+    <div id="imagemDashboard" style="text-align:center; margin: 20px 0;"></div>
+    <div id="conteudoResumoPDF"></div>
+    
 <!-- Firebase + Script -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -379,11 +383,8 @@ window.fecharModalAjuda = function() {
     document.getElementById('modalAjuda').style.display = 'none';
 };
 
-<div id="resumoPDF" style="display:none; padding: 20px; font-family: Arial, sans-serif;">
-    <h2 style="text-align:center;">Resumo do dia - <span id="dataResumoPDF"></span></h2>
-    <div id="imagemDashboard" style="text-align:center; margin: 20px 0;"></div>
-    <div id="conteudoResumoPDF"></div>
-</div>
+
+
 
 </script> <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
