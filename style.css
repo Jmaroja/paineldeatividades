@@ -619,3 +619,25 @@ body.dark ::-webkit-scrollbar-thumb {
     background: #fff;
     z-index: 10000;
 }
+.legend-corner.legend-bottom {
+    position: fixed;
+    left: 22px;
+    bottom: 16px;
+    z-index: 40;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(10,73,167,0.10);
+    min-width: 134px;
+    border-radius: 11px;
+    opacity: 0.96;
+    padding: 12px 18px 14px 18px;
+    font-size: 1.05rem;
+    pointer-events: auto;
+    color: #333;
+}
+body.dark .legend-corner.legend-bottom {
+    background: #232d44;
+    color: #e9efff;
+}
+@media (max-width: 700px) {
+    .legend-corner.legend-bottom { left: 6px; bottom: 7px; padding: 8px 8px 9px 11px; font-size: 0.98rem;}
+}
