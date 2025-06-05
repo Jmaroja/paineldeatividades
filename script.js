@@ -1,3 +1,7 @@
+
+
+
+
 // SPLASH
 window.onload = function () {
   abrirAba("calendario");
@@ -16,6 +20,7 @@ window.onload = function () {
         });
     }
 };
+
 
 
 // LOGIN FLUXO
@@ -153,6 +158,27 @@ let todasAtividades = [];
 let atividadesFiltradas = [];
 let calendar = null;
 let usuariosMap = {};
+
+// Inicialização do Firebase para o projeto nordil-atividades
+const firebaseConfig = {
+  apiKey: "AIzaSyBndhAbgEbFxCZvTVfkqMH6MTuyzhPTxUo",
+  authDomain: "nordil-atividades.firebaseapp.com",
+  projectId: "nordil-atividades",
+  storageBucket: "nordil-atividades.firebasestorage.app",
+  messagingSenderId: "138660523776",
+  appId: "1:138660523776:web:d47955e6b48401c233cde5"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Agora sim pode usar db aqui embaixo
+function listarUsuariosMap() {
+  db.collection("usuarios").get().then(snapshot => {
+  });
+}
+
+
 function listarUsuariosMap() {
     db.collection('usuarios').get().then(snapshot => {
         usuariosMap = {};
