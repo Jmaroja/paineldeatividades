@@ -207,6 +207,25 @@
                     <option value="extra">🟡 Extra</option>
                 </select>
             </label><br>
+            <!-- BLOCO QUE SÓ APARECE PARA RECORRENTE -->
+<div id="opcoesRecorrencia" style="display:none; margin-top: 14px;">
+    <label><b>Repetir em quais dias da semana?</b></label>
+    <div class="dias-semana" style="margin: 8px 0 12px;">
+        <label><input type="checkbox" value="1"> Seg</label>
+        <label><input type="checkbox" value="2"> Ter</label>
+        <label><input type="checkbox" value="3"> Qua</label>
+        <label><input type="checkbox" value="4"> Qui</label>
+        <label><input type="checkbox" value="5"> Sex</label>
+    </div>
+    <label style="display:block; margin-top:6px;">
+        <input type="checkbox" id="repetirMes"> Gerar para o mês inteiro
+    </label>
+</div>
+
+<label>Descrição (opcional):<br>
+    <textarea id="novaDescricao" rows="3"></textarea>
+</label>          
+
             <label>Descrição (opcional):<br>
                 <textarea id="novaDescricao" rows="3"></textarea>
             </label>

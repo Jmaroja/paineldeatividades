@@ -4,7 +4,17 @@ window.onload = function () {
         document.getElementById('splash').style.display = 'none';
     }, 1100);
     document.getElementById('splash').style.display = '';
+
+     // Mostrar opções de recorrência apenas se tipo for "recorrente"
+    const tipoSelect = document.getElementById('novoTipoAtividade');
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function () {
+            const tipo = this.value;
+            document.getElementById('opcoesRecorrencia').style.display = tipo === 'recorrente' ? '' : 'none';
+        });
+    }
 };
+
 
 // LOGIN FLUXO
 document.getElementById('loginForm').addEventListener('submit', function (event) {
@@ -525,30 +535,80 @@ function fecharModalEditarAtividade() {
     document.getElementById('modalEditarAtividade').style.display = 'none';
     window.atividadeEditando = null;
 }
-document.getElementById('formEditarAtividade').onsubmit = async function(e) {
+document.getElementById('formAdicionarAtividade').onsubmit = async function (e) {
     e.preventDefault();
-    const id = window.atividadeEditando;
-    if (!id) return;
-    const data = document.getElementById('editarData').value;
-    const tipoAtv = document.getElementById('editarTipoAtividade').value;
-    let responsavel = document.getElementById('editarResponsavel').value.trim();
-    let atividade = document.getElementById('editarAtividade').value.trim();
-    let descricao = document.getElementById('editarDescricao').value.trim();
+
+    const data = document.getElementById('novaData').value;
+    const tipoAtv = document.getElementById('novoTipoAtividade').value;
+    let responsavel = document.getElementById('novoResponsavel').value.trim();
+    let atividade = document.getElementById('novaAtividade').value.trim();
+    let descricao = document.getElementById('novaDescricao').value.trim();
+    let repetirMes = document.getElementById('repetirMes').checked;
+
+    const departamento = sessionStorage.getItem('tipo') === "admin" || sessionStorage.getItem('tipo') === "gestor"
+        ? (usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : sessionStorage.getItem('departamento'))
+        : sessionStorage.getItem('departamento');
 
     if (!data || !responsavel || !atividade) {
-        document.getElementById('msgEditarAtividade').textContent = "Preencha todos os campos obrigatórios.";
+        document.getElementById('msgAdicionarAtividade').textContent = "Preencha todos os campos obrigatórios.";
         return;
     }
-    await db.collection('atividades').doc(id).update({
-        data: data,
-        responsavel: responsavel,
-        atividade: atividade,
-        tipo: tipoAtv,
-        descricao: descricao
+
+    const atividadesParaSalvar = [];
+
+    if (tipoAtv === 'recorrente' && repetirMes) {
+        const diasSelecionados = Array.from(document.querySelectorAll('#opcoesRecorrencia input[type="checkbox"]:checked'))
+            .map(cb => parseInt(cb.value));
+
+        if (diasSelecionados.length === 0) {
+            document.getElementById('msgAdicionarAtividade').textContent = "Selecione ao menos um dia da semana para repetir.";
+            return;
+        }
+
+        const dataInicial = new Date(data);
+        const ano = dataInicial.getFullYear();
+        const mes = dataInicial.getMonth();
+
+        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+        for (let dia = 1; dia <= ultimoDia; dia++) {
+            const atual = new Date(ano, mes, dia);
+            if (diasSelecionados.includes(atual.getDay()) && atual >= dataInicial) {
+                atividadesParaSalvar.push({
+                    data: atual.toISOString().slice(0, 10),
+                    responsavel,
+                    atividade,
+                    tipo: tipoAtv,
+                    descricao,
+                    departamento: departamento || '',
+                    status: 'pendente'
+                });
+            }
+        }
+    } else {
+        // Apenas uma atividade
+        atividadesParaSalvar.push({
+            data,
+            responsavel,
+            atividade,
+            tipo: tipoAtv,
+            descricao,
+            departamento: departamento || '',
+            status: 'pendente'
+        });
+    }
+
+    const batch = db.batch();
+    atividadesParaSalvar.forEach(atv => {
+        const ref = db.collection('atividades').doc();
+        batch.set(ref, atv);
     });
-    document.getElementById('msgEditarAtividade').textContent = "Alteração salva!";
+
+    await batch.commit();
+
+    document.getElementById('msgAdicionarAtividade').textContent = "Atividade(s) adicionada(s) com sucesso!";
     setTimeout(() => {
-        fecharModalEditarAtividade();
+        fecharModalAdicionarAtividade();
         carregarAtividades();
     }, 900);
 };

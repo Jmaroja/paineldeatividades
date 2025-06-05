@@ -676,3 +676,48 @@ body.dark .legend-corner.legend-bottom {
 #legendaCores {
     display: none;
 }
+.dias-semana {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.dias-semana label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f3f8;
+    color: #34495e;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.dias-semana label input {
+    display: none;
+}
+
+.dias-semana label:has(input:checked) {
+    background: #2980ef;
+    color: #fff;
+    border-color: #2980ef;
+    font-weight: bold;
+}
+
+/* Dark mode */
+body.dark .dias-semana label {
+    background: #2c3e50;
+    color: #ecf0f1;
+    border: 1px solid #3d5a6c;
+}
+
+body.dark .dias-semana label:has(input:checked) {
+    background: #3498db;
+    color: #fff;
+    border-color: #3498db;
+}
