@@ -601,3 +601,21 @@ body.dark ::-webkit-scrollbar-thumb {
     letter-spacing: 0.03em;
     margin: 0 4px;
 }
+#splash img.logo {
+    width: 110px;
+    height: auto;
+    max-width: 32vw;
+    /* Centraliza vertical/horizontal (se precisar): */
+    display: block;
+    margin: 0 auto;
+}
+#splash {
+    /* Mantém splash sempre centralizado na tela */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background: #fff;
+    z-index: 10000;
+}

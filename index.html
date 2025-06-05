@@ -14,6 +14,15 @@
     <link rel="icon" href="logo.png">
 </head>
 <body>
+    <div class="legend-corner legend-bottom" id="legendaCores">
+    <b>Legenda:</b>
+    <div><span class="leg-dot urgente"></span> Urgente</div>
+    <div><span class="leg-dot recorrente"></span> Recorrente</div>
+    <div><span class="leg-dot extra"></span> Extra</div>
+    <div><span class="leg-dot realizado"></span> Realizado</div>
+    <div><span class="leg-dot pendente"></span> Pendente</div>
+</div>
+
 
 <div id="splash" style="display: none;">
     <img src="logo.png" class="logo" alt="Nordil Logo">
@@ -34,21 +43,15 @@
         <img src="logo.png" class="logo" alt="Nordil Logo">
         <h1>Painel de Atividades</h1>
         <div class="header-right">
-    <span id="usuarioLogado" class="usuario-logado"></span>
-    <span id="departamentoLogado" class="departamento-logado"></span>
-        <div class="legend-corner" id="legendaCores">
-            <b>Legenda:</b>
-            <div><span class="leg-dot urgente"></span> Urgente</div>
-            <div><span class="leg-dot recorrente"></span> Recorrente</div>
-            <div><span class="leg-dot extra"></span> Extra</div>
-            <div><span class="leg-dot realizado"></span> Realizado</div>
-            <div><span class="leg-dot pendente"></span> Pendente</div>
+            <span id="usuarioLogado" class="usuario-logado"></span>
+            <span id="departamentoLogado" class="departamento-logado"></span>
+            <button id="btnAjuda" title="Instruções" class="btn-header">❓</button>
+            <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
+            <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
         </div>
-        <button id="btnAjuda" title="Instruções" class="btn-header">❓</button>
-    <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
-    <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
     </div>
 </header>
+
 
 <div id="alertaTarefasDia" class="alerta-tarefas-dia" style="display: none;"></div>
 
