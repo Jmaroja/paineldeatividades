@@ -574,8 +574,10 @@ document.getElementById('btnConfirmarExcluir').onclick = async function() {
         alert('Informe o motivo da exclusão.');
         return;
     }
+
     const atv = todasAtividades.find(a => a.id === id);
     if (!atv) return;
+
     // Salva o log
     await db.collection('logs_exclusao').add({
         datahora: new Date().toISOString(),
@@ -590,12 +592,20 @@ document.getElementById('btnConfirmarExcluir').onclick = async function() {
             status: atv.status || 'pendente'
         }
     });
-    // Remove atividade
+
+    // Remove atividade do Firestore
     await db.collection('atividades').doc(id).delete();
+
+    // Remove atividade visual do calendário
+    calendar.getEventById(id)?.remove();
+
+    // Fecha modal e recarrega dashboard e tabela
     fecharModalExcluirAtividade();
     carregarAtividades();
+
     alert("Atividade excluída e log registrada!");
 };
+
 
 // ----------- DASHBOARD, GRÁFICOS, LOGS E EXPORTAÇÃO -----------
 function atualizarDashboard() {
