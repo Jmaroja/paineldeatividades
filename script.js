@@ -1,5 +1,7 @@
 // SPLASH
 window.onload = function () {
+  abrirAba("calendario");
+  carregarAtividades();
     setTimeout(function () {
         document.getElementById('splash').style.display = 'none';
     }, 1100);
@@ -966,11 +968,7 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function(e) {
 function fecharModalAjuda() {
     document.getElementById('modalAjuda').style.display = 'none';
 }
-window.gerarPDFDia = async function () {
-    const hoje = new Date().toISOString().slice(0, 10);
-    const atividadesDoDia = todasAtividades.filter(atv => atv.data === hoje);
 
-    const agrupado = {};
     atividadesDoDia.forEach(atv => {
         if (!agrupado[atv.responsavel]) agrupado[atv.responsavel] = [];
         agrupado[atv.responsavel].push(atv);
@@ -1012,4 +1010,3 @@ window.gerarPDFDia = async function () {
     }).save().then(() => {
         resumoDiv.style.display = 'none';
     });
-};
