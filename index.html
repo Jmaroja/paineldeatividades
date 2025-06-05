@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Painel de Atividades</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- FONTES OSWALD & ROBOTO -->
+    <!-- Fontes -->
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Roboto:wght@700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
@@ -14,6 +14,18 @@
     <link rel="icon" href="logo.png">
 </head>
 <body>
+ <!-- ...fim do seu HTML... -->
+
+<div class="legend-corner legend-bottom" id="legendaCores">
+    <b>Legenda:</b>
+    <div><span class="leg-dot urgente"></span> Urgente</div>
+    <div><span class="leg-dot recorrente"></span> Recorrente</div>
+    <div><span class="leg-dot extra"></span> Extra</div>
+    <div><span class="leg-dot realizado"></span> Realizado</div>
+    <div><span class="leg-dot pendente"></span> Pendente</div>
+</div>
+</body>
+</html>
 
 <div id="splash" style="display: none;">
     <img src="logo.png" class="logo" alt="Nordil Logo">
@@ -33,149 +45,145 @@
     <div class="header-content">
         <img src="logo.png" class="logo" alt="Nordil Logo">
         <h1>Painel de Atividades</h1>
-        <span id="usuarioLogado" class="usuario-logado"></span>
-        <span id="departamentoLogado" class="departamento-logado"></span>
-        <button id="btnAjuda" title="Instruções" class="btn-header">❓</button>
-        <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
-        <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
+        <div class="header-right">
+            <span id="usuarioLogado" class="usuario-logado"></span>
+            <span id="departamentoLogado" class="departamento-logado"></span>
+            <button id="btnAjuda" title="Instruções" class="btn-header">❓</button>
+            <button id="btnTema" title="Alternar tema" class="btn-header">🌙</button>
+            <button id="btnLogout" title="Sair" class="btn-header" onclick="fazerLogout()">Sair</button>
+        </div>
     </div>
 </header>
 
+
 <div id="alertaTarefasDia" class="alerta-tarefas-dia" style="display: none;"></div>
 
-<div class="nav-tabs" style="display:none;">
-    <button id="btnCalendario" class="active" onclick="abrirAba('calendario')">📅 <span>Calendário</span></button>
-    <button id="btnDashboard" onclick="abrirAba('dashboard')">📊 <span>Dashboard</span></button>
-    <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;">👥 <span>Usuários</span></button>
-    <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;">📝 <span>Logs de Exclusão</span></button>
-</div>
-
-<!-- Calendário -->
-<section id="aba-calendario" style="display:none;">
-    <div class="top-actions">
-        <div class="card card-upload">
-            <div class="card-header">
-                <span class="icon-upload">
-                    <svg width="26" height="26" ...></svg>
-                </span>
-                <span><b>Upload CSV</b></span>
-            </div>
-            <div class="input-upload-group">
-                <input type="file" id="csvFile" class="input-upload">
-                <button class="btn-upload" onclick="processCSV()">Carregar Dados</button>
-            </div>
-            <div class="btns-row">
-                <button id="btnLimparCalendario" class="btn-limpar">🧹 Limpar Calendário</button>
-                <button id="btnAdicionarAtividade" class="btn-adicionar">+ Adicionar Atividade</button>
-            </div>
+<div class="painel-main" style="display:none;">
+    <!-- SIDEBAR LATERAL -->
+    <div class="sidebar">
+        <div class="sidebar-group">
+            <label class="sidebar-label">Upload CSV</label>
+            <input type="file" id="csvFile" class="input-upload">
+            <button class="btn-upload" onclick="processCSV()">Carregar</button>
         </div>
-        <div class="card card-filtro">
-            <div class="card-header">
-                <span class="icon-filter">
-                    <svg width="24" height="24" ...></svg>
-                </span>
-                <span><b>Filtrar Atividades</b></span>
-            </div>
-            <label for="departamentoSelect">Departamento:</label>
+        <button id="btnLimparCalendario" class="btn-limpar">🧹 Limpar</button>
+        <button id="btnAdicionarAtividade" class="btn-adicionar">+ Atividade</button>
+        <div class="sidebar-group">
+            <label class="sidebar-label">Departamento</label>
             <select id="departamentoSelect" onchange="filtrarPorDepartamento()">
                 <option value="todos">Todos</option>
             </select>
-            <label for="responsavelSelect" style="margin-top: 12px;">Responsável:</label>
+            <label class="sidebar-label">Responsável</label>
             <select id="responsavelSelect" onchange="filtrarPorResponsavel()">
                 <option value="todos">Todos</option>
             </select>
         </div>
+       <div class="sidebar-group" style="margin-top:40px;">
+    <button id="btnCalendario" onclick="abrirAba('calendario')" class="btn-sidebar-aba">📅 Calendário</button>
+    <button id="btnDashboard" onclick="abrirAba('dashboard')" class="btn-sidebar-aba">📊 Dashboard</button>
+    <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;" class="btn-sidebar-aba">👥 Usuários</button>
+    <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;" class="btn-sidebar-aba">📝 Logs de Exclusão</button>
+</div>
+
     </div>
-    <div id="calendar"></div>
-</section>
 
-<!-- Dashboard -->
-<section id="aba-dashboard" style="display:none;">
-    <div class="dashboard">
-        <div class="cardsResumo">
-            <div class="cardResumo"><h3>Total</h3><p id="totalAtividades">0</p></div>
-            <div class="cardResumo"><h3>Realizadas</h3><p id="totalRealizadas">0</p></div>
-            <div class="cardResumo"><h3>Não Realizadas</h3><p id="totalNaoRealizadas">0</p></div>
-            <div class="cardResumo"><h3>% Concluído</h3><p id="percentualConclusao">0%</p></div>
-        </div>
-        <canvas id="graficoBarras"></canvas>
-        <canvas id="graficoLinha"></canvas>
-        <h3 style="margin-top:32px; margin-bottom:12px;">Motivos de Não Realização</h3>
-        <canvas id="graficoMotivos"></canvas>
-        <button onclick="exportarResumo()">📤 Exportar CSV</button>
-        <h3>Lista Detalhada de Atividades</h3>
-        <table id="tabelaAtividades">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Departamento</th>
-                    <th>Responsável</th>
-                    <th>Atividade</th>
-                    <th>Tipo</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="painel-content">
+        <!-- Calendário -->
+        <section id="aba-calendario">
+            <div id="calendar"></div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="aba-dashboard" style="display:none;">
+            <div class="dashboard">
+                <div class="cardsResumo">
+                    <div class="cardResumo"><h3>Total</h3><p id="totalAtividades">0</p></div>
+                    <div class="cardResumo"><h3>Realizadas</h3><p id="totalRealizadas">0</p></div>
+                    <div class="cardResumo"><h3>Não Realizadas</h3><p id="totalNaoRealizadas">0</p></div>
+                    <div class="cardResumo"><h3>% Concluído</h3><p id="percentualConclusao">0%</p></div>
+                </div>
+                <canvas id="graficoBarras"></canvas>
+                <canvas id="graficoLinha"></canvas>
+                <h3 style="margin-top:32px; margin-bottom:12px;">Motivos de Não Realização</h3>
+                <canvas id="graficoMotivos"></canvas>
+                <button onclick="exportarResumo()">📤 Exportar CSV</button>
+                <h3>Lista Detalhada de Atividades</h3>
+                <table id="tabelaAtividades">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Departamento</th>
+                            <th>Responsável</th>
+                            <th>Atividade</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Usuários -->
+        <section id="aba-usuarios" style="display:none;">
+            <h2>Gerenciar Usuários</h2>
+            <form id="usuarioForm" autocomplete="off">
+                <input type="text" id="novoUsuario" placeholder="Usuário" required>
+                <select id="novoDepartamento" required>
+                    <option value="">Selecione o Departamento</option>
+                    <option value="DP">DP</option>
+                    <option value="Comercial">Comercial</option>
+                    <option value="Financeiro">Financeiro</option>
+                    <option value="TI">TI</option>
+                    <option value="Compras">Compras</option>
+                    <option value="Outros">Outros</option>
+                </select>
+                <input type="password" id="novaSenha" placeholder="Senha" required>
+                <input type="email" id="novoEmail" placeholder="E-mail (opcional)">
+                <select id="novoTipo">
+                    <option value="comum">Comum</option>
+                    <option value="gestor">Gestor</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button type="submit">Adicionar</button>
+            </form>
+            <h3>Lista de Usuários</h3>
+            <table id="tabelaUsuarios">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>E-mail</th>
+                        <th>Departamento</th>
+                        <th>Tipo</th>
+                        <th>Senha</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Logs de Exclusão (admin) -->
+        <section id="aba-logs" style="display:none;">
+            <h2>Logs de Exclusão</h2>
+            <table id="tabelaLogs">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Quem Excluiu</th>
+                        <th>Motivo</th>
+                        <th>Atividade Excluída</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
     </div>
-</section>
+</div>
 
-<!-- Usuários -->
-<section id="aba-usuarios" style="display:none;">
-    <h2>Gerenciar Usuários</h2>
-    <form id="usuarioForm" autocomplete="off">
-        <input type="text" id="novoUsuario" placeholder="Usuário" required>
-        <input type="password" id="novaSenha" placeholder="Senha" required>
-        <input type="email" id="novoEmail" placeholder="E-mail (opcional)">
-        <select id="novoDepartamento" required>
-            <option value="">Selecione o Departamento</option>
-            <option value="DP">DP</option>
-            <option value="Comercial">Comercial</option>
-            <option value="Financeiro">Financeiro</option>
-            <option value="TI">TI</option>
-            <option value="Compras">Compras</option>
-            <option value="Outros">Outros</option>
-        </select>
-        <select id="novoTipo">
-            <option value="comum">Comum</option>
-            <option value="gestor">Gestor</option>
-            <option value="admin">Admin</option>
-        </select>
-        <button type="submit">Adicionar</button>
-    </form>
-    <h3>Lista de Usuários</h3>
-    <table id="tabelaUsuarios">
-        <thead>
-            <tr>
-                <th>Usuário</th>
-                <th>E-mail</th>
-                <th>Departamento</th>
-                <th>Tipo</th>
-                <th>Senha</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</section>
-
-<!-- Logs de Exclusão (admin) -->
-<section id="aba-logs" style="display:none;">
-    <h2>Logs de Exclusão</h2>
-    <table id="tabelaLogs">
-        <thead>
-            <tr>
-                <th>Data/Hora</th>
-                <th>Quem Excluiu</th>
-                <th>Motivo</th>
-                <th>Atividade Excluída</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</section>
-
+<!-- MODAIS -->
 <!-- Modal Adicionar Atividade -->
 <div id="modalAdicionarAtividade" class="modal">
     <div class="modal-content">
@@ -249,7 +257,7 @@
         <h3>Excluir Atividade</h3>
         <p id="infoExcluirAtividade"></p>
         <label>Motivo da exclusão:<br>
-            <input type="text" id="motivoExclusao" required placeholder="Descreva o motivo..." autocomplete="off">
+            <input type="text" id="motivoExclusao" required placeholder="Ex: Duplicidade, erro de digitação, tarefa já cumprida...">
         </label>
         <button id="btnConfirmarExcluir" class="btn-limpar" style="margin-top:16px;width:100%;">Excluir Definitivamente</button>
     </div>
@@ -281,6 +289,16 @@
             </select>
             <button class="btn-danger" style="margin-left: 12px;" onclick="marcarStatusModal(false)">Salvar Não Realizado</button>
         </div>
+    </div>
+</div>
+
+<!-- Modal de Pendências do Dia Anterior -->
+<div id="modalPendencias" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalPendencias()">&times;</span>
+        <h3>Pendências do Dia Anterior</h3>
+        <div id="listaPendencias"></div>
+        <button class="btn-adicionar" onclick="fecharModalPendencias()" style="width:100%;margin-top:12px;">Fechar</button>
     </div>
 </div>
 
@@ -336,16 +354,6 @@ document.getElementById('btnAjuda').onclick = function() {
 window.fecharModalAjuda = function() {
     document.getElementById('modalAjuda').style.display = 'none';
 };
-window.onclick = function(event) {
-    if (event.target === document.getElementById('modalAjuda')) {
-        fecharModalAjuda();
-    }
-};
-document.addEventListener('keydown', function(e) {
-    if (e.key === "Escape") {
-        fecharModalAjuda();
-    }
-});
 </script>
 </body>
 </html>
