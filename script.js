@@ -477,6 +477,12 @@ function renderizarTabelaAtividades() {
     });
 
 }
+function formatarDataBrasileira(dataStr) {
+    if (!dataStr) return '';
+    const partes = dataStr.split('-'); // [ano, mes, dia]
+    if (partes.length !== 3) return dataStr;
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
 function statusFormatado(status, motivo) {
     if (status === 'realizado') return 'Realizado';
     if (status === 'naoRealizado') return 'Não Realizado' + (motivo ? ` (${motivo})` : '');
