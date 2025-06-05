@@ -985,28 +985,3 @@ function fecharModalAjuda() {
 
     document.getElementById('dataResumoPDF').textContent = hoje.split('-').reverse().join('/');
     document.getElementById('conteudoResumoPDF').innerHTML = html;
-
-    const dashboard = document.getElementById('dashboardContainer') || document.getElementById('graficoDashboard');
-    const canvas = await html2canvas(dashboard);
-    const imgData = canvas.toDataURL("image/png");
-
-    const img = new Image();
-    img.src = imgData;
-    img.style.maxWidth = "100%";
-    img.style.margin = "10px auto";
-    const imagemDiv = document.getElementById('imagemDashboard');
-    imagemDiv.innerHTML = '';
-    imagemDiv.appendChild(img);
-
-    const resumoDiv = document.getElementById('resumoPDF');
-    resumoDiv.style.display = 'block';
-
-    html2pdf().from(resumoDiv).set({
-        margin: 10,
-        filename: `resumo-${hoje}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).save().then(() => {
-        resumoDiv.style.display = 'none';
-    });
