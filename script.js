@@ -452,7 +452,11 @@ function renderizarTabelaAtividades() {
     const tipo = sessionStorage.getItem('tipo');
     const tbody = document.getElementById('tabelaAtividades').querySelector('tbody');
     tbody.innerHTML = '';
-    atividadesFiltradas.forEach(a => {
+
+    // Ordena por data DESC antes de exibir
+    const atividadesOrdenadas = atividadesFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    atividadesOrdenadas.forEach(a => {
         const podeEditar = tipo === 'admin' || tipo === "gestor" || a.responsavel === usuario;
         tbody.innerHTML += `
             <tr>
@@ -471,6 +475,7 @@ function renderizarTabelaAtividades() {
             </tr>
         `;
     });
+
 }
 function statusFormatado(status, motivo) {
     if (status === 'realizado') return 'Realizado';
