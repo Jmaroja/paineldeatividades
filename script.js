@@ -46,6 +46,15 @@ function fazerLogin() {
             sessionStorage.setItem('tipo', doc.data().tipo);
             sessionStorage.setItem('departamento', doc.data().departamento || '');
             exibirSistema(usuario, doc.data().tipo, doc.data().departamento || '');
+            if (doc.data().tipo === "comum") {
+            document.getElementById("btnDashboard").style.display = "none";
+            if (doc.data().tipo === "comum") {
+            document.getElementById("filtrosLaterais").style.display = "none";
+}
+
+            
+}
+
         } else {
             erroLogin.textContent = 'Usuário ou senha inválidos.';
         }
@@ -112,6 +121,8 @@ function fazerLogout() {
 
 // Abas
 window.abrirAba = function (aba) {
+    const tipoUsuario = sessionStorage.getItem('tipo');
+    if (aba === 'dashboard' && tipoUsuario === 'comum') return; // Bloqueia comum          
     document.querySelectorAll('.painel-content section').forEach(sec => sec.style.display = 'none');
     marcarAbaAtiva('aba-' + aba);
     document.getElementById('aba-' + aba).style.display = '';

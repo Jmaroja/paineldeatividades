@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/locales-all.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="icon" href="logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
  
@@ -59,22 +61,32 @@
         </div>
         <button id="btnLimparCalendario" class="btn-limpar">🧹 Limpar</button>
         <button id="btnAdicionarAtividade" class="btn-adicionar">+ Atividade</button>
-        <div class="sidebar-group">
-            <label class="sidebar-label">Departamento</label>
-            <select id="departamentoSelect" onchange="filtrarPorDepartamento()">
-                <option value="todos">Todos</option>
-            </select>
-            <label class="sidebar-label">Responsável</label>
-            <select id="responsavelSelect" onchange="filtrarPorResponsavel()">
-                <option value="todos">Todos</option>
-            </select>
+        <div id="filtrosLaterais" class="sidebar-group">
+  <label class="sidebar-label">Departamento</label>
+  <select id="departamentoSelect" onchange="filtrarPorDepartamento()">
+      <option value="todos">Todos</option>
+  </select>
+  <label class="sidebar-label">Responsável</label>
+  <select id="responsavelSelect" onchange="filtrarPorResponsavel()">
+      <option value="todos">Todos</option>
+  </select>
         </div>
-       <div class="sidebar-group" style="margin-top:40px;">
-    <button id="btnCalendario" onclick="abrirAba('calendario')" class="btn-sidebar-aba">📅 Calendário</button>
-    <button id="btnDashboard" onclick="abrirAba('dashboard')" class="btn-sidebar-aba">📊 Dashboard</button>
-    <button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;" class="btn-sidebar-aba">👥 Usuários</button>
-    <button id="btnLogs" onclick="abrirAba('logs')" style="display:none;" class="btn-sidebar-aba">📝 Logs de Exclusão</button>
-</div>
+      <button id="btnCalendario" onclick="abrirAba('calendario')" class="btn-sidebar-aba">
+  <i class="fas fa-calendar-alt"></i> Calendário
+</button>
+
+<button id="btnDashboard" onclick="abrirAba('dashboard')" class="btn-sidebar-aba">
+  <i class="fas fa-chart-bar"></i> Dashboard
+</button>
+
+<button id="btnUsuarios" onclick="abrirAba('usuarios')" style="display:none;" class="btn-sidebar-aba">
+  <i class="fas fa-users"></i> Usuários
+</button>
+
+<button id="btnLogs" onclick="abrirAba('logs')" style="display:none;" class="btn-sidebar-aba">
+  <i class="fas fa-file-alt"></i> Logs de Exclusão
+</button>
+
 <div class="legend-corner legend-bottom" id="legendaCores">
     <b>Legenda:</b>
     <div><span class="leg-dot urgente"></span> Urgente</div>

@@ -198,7 +198,7 @@ body.dark #legendaCores {
     cursor: pointer;
     transition: background 0.13s;
 }
-.btn-upload:hover { background: linear-gradient(90deg, #1548b4 80%, #19ac8c 100%);}
+.btn-upload:hover { background: linear-gradient(90deg, #1548b4 80%, #2819ac 100%);}
 .btn-limpar {
     background: #e74c3c;
     color: #fff;
@@ -225,7 +225,7 @@ body.dark #legendaCores {
 .btn-adicionar:hover { background: #1844b4;}
 .btn-sidebar-aba {
     width: 100%;
-    background: #0a49a7;
+    background: linear-gradient(90deg, #2a6fff 80%, #1c2dc7 100%);
     color: #fff;
     border: none;
     border-radius: 7px;
@@ -720,4 +720,28 @@ body.dark .dias-semana label:has(input:checked) {
     background: #3498db;
     color: #fff;
     border-color: #3498db;
+}
+
+/* Padronização e gradiente para botões laterais */
+.btn-upload,
+.btn-limpar,
+.btn-adicionar {
+    width: 100%;
+    font-size: 1.05rem;
+    padding: 10px 8px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 8px;
+    min-height: 42px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transition: background 0.3s ease;
+}
+
+.btn-upload:hover,
+.btn-limpar:hover,
+.btn-adicionar:hover {
+    background: linear-gradient(135deg, #1e40af, #1d4ed8);
 }
