@@ -587,6 +587,33 @@ window.marcarStatusModal = function (realizado) {
         carregarAtividades();
     });
 }
+window.excluirAtividadeDireto = function () {
+    if (!atividadeSelecionada || !atividadeSelecionada.id) return;
+
+    if (confirm(`Tem certeza que deseja excluir a atividade "${atividadeSelecionada.atividade}"?`)) {
+        // Grava log de exclusão
+        db.collection('logs_exclusao').add({
+            datahora: new Date().toISOString(),
+            quem: sessionStorage.getItem('usuario'),
+            motivo: 'Exclusão direta via modal de detalhes',
+            atividade: {
+                data: atividadeSelecionada.data,
+                departamento: atividadeSelecionada.departamento || '',
+                responsavel: atividadeSelecionada.responsavel,
+                atividade: atividadeSelecionada.atividade,
+                tipo: atividadeSelecionada.tipo || 'urgente',
+                status: atividadeSelecionada.status || 'pendente'
+            }
+        });
+
+        // Exclui atividade
+        db.collection('atividades').doc(atividadeSelecionada.id).delete().then(() => {
+            fecharModal();
+            carregarAtividades();
+            alert("Atividade excluída com sucesso.");
+        });
+    }
+};
 
 // MODAL EDITAR ATIVIDADE
 window.abrirModalEditarAtividade = function(id) {
