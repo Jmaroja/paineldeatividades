@@ -50,6 +50,7 @@ function fazerLogin() {
             document.getElementById("btnDashboard").style.display = "none";
             if (doc.data().tipo === "comum") {
             document.getElementById("filtrosLaterais").style.display = "none";
+            
 }
 
             
@@ -623,7 +624,7 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
     let responsavel = document.getElementById('novoResponsavel').value.trim();
     let atividade = document.getElementById('novaAtividade').value.trim();
     let descricao = document.getElementById('novaDescricao').value.trim();
-    let repetirMes = document.getElementById('repetirMes').checked;
+    let repetirMes = document.getElementById('repetirMes')?.checked || false;
 
     const tipoUsuario = sessionStorage.getItem('tipo');
     const departamento =
@@ -631,12 +632,11 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
             ? (usuariosMap[responsavel]?.departamento || sessionStorage.getItem('departamento'))
             : sessionStorage.getItem('departamento');
 
-
     const atividadesParaSalvar = [];
 
     if (tipoAtv === 'recorrente' && repetirMes) {
-        const diasSelecionados = Array.from(document.querySelectorAll('#opcoesRecorrencia input[type="checkbox"]:checked'))
-            .map(cb => parseInt(cb.value));
+        const checkboxesSelecionados = document.querySelectorAll('#opcoesRecorrencia input[type="checkbox"]:checked');
+        const diasSelecionados = Array.from(checkboxesSelecionados).map(cb => parseInt(cb.value));
 
         if (diasSelecionados.length === 0) {
             document.getElementById('msgAdicionarAtividade').textContent = "Selecione ao menos um dia da semana para repetir.";
@@ -644,9 +644,13 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
         }
 
         const dataInicial = new Date(data);
+        if (isNaN(dataInicial)) {
+            document.getElementById('msgAdicionarAtividade').textContent = "Data inválida.";
+            return;
+        }
+
         const ano = dataInicial.getFullYear();
         const mes = dataInicial.getMonth();
-
         const ultimoDia = new Date(ano, mes + 1, 0).getDate();
 
         for (let dia = 1; dia <= ultimoDia; dia++) {
@@ -663,6 +667,8 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
                 });
             }
         }
+
+        console.log(`[Recorrência] Geradas ${atividadesParaSalvar.length} atividades para o mês.`);
     } else {
         // Apenas uma atividade
         atividadesParaSalvar.push({
@@ -674,6 +680,7 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
             departamento: departamento || '',
             status: 'pendente'
         });
+        console.log(`[Única] Adicionando uma atividade única para ${data}`);
     }
 
     const batch = db.batch();
@@ -690,6 +697,7 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
         carregarAtividades();
     }, 900);
 };
+
 
 // MODAL EXCLUIR ATIVIDADE (com motivo e log)
 window.abrirModalExcluirAtividade = function(id) {
@@ -759,7 +767,7 @@ function atualizarDashboard() {
 function renderizarGraficos() {
     // Barras
     const ctxBarras = document.getElementById('graficoBarras').getContext('2d');
-    if (chartBarras) chartBarras.destroy();chartbarras = null;
+    if (chartBarras) chartBarras.destroy();chartBarras = null;
     const realizadas = atividadesFiltradas.filter(a => a.status === 'realizado').length;
     const naoRealizadas = atividadesFiltradas.filter(a => a.status === 'naoRealizado').length;
     const pendentes = atividadesFiltradas.filter(a => !a.status || a.status === 'pendente').length;
