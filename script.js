@@ -394,15 +394,21 @@ function inicializarCalendario() {
         editable: true,
         events: todasAtividades.map(a => ({
             id: a.id,
-            title: a.atividade,
+            title: sessionStorage.getItem('tipo') === "gestor" ? `${a.responsavel}: ${a.atividade}` : a.atividade,
             start: a.data,
             color: a.status === "realizado"
                 ? "#22b573"
+                : a.status === "naoRealizado"
+                ? "#d32f2f" // vermelho escur
                 : a.tipo === "urgente" ? "#e74c3c"
                 : a.tipo === "recorrente" ? "#2980ef"
                 : "#ffc107",
             classNames: [
-                a.status === "realizado" ? "realizado" : (a.tipo || 'urgente')
+                 a.status === "realizado"
+                ? "realizado"
+                : a.status === "naoRealizado"
+                ? "naoRealizado"
+            : (a.tipo || 'urgente')
             ],
             extendedProps: {
                 responsavel: a.responsavel,
@@ -565,6 +571,10 @@ function fecharModalEditarAtividade() {
 document.getElementById('formAdicionarAtividade').onsubmit = async function (e) {
     e.preventDefault();
 
+    if (Object.keys(usuariosMap).length === 0) {
+        await listarUsuariosMap(); // Garante que o mapa está carregado
+    }
+
     const data = document.getElementById('novaData').value;
     const tipoAtv = document.getElementById('novoTipoAtividade').value;
     let responsavel = document.getElementById('novoResponsavel').value.trim();
@@ -572,14 +582,12 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
     let descricao = document.getElementById('novaDescricao').value.trim();
     let repetirMes = document.getElementById('repetirMes').checked;
 
-    const departamento = sessionStorage.getItem('tipo') === "admin" || sessionStorage.getItem('tipo') === "gestor"
-        ? (usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : sessionStorage.getItem('departamento'))
-        : sessionStorage.getItem('departamento');
+    const tipoUsuario = sessionStorage.getItem('tipo');
+    const departamento =
+        tipoUsuario === "admin" || tipoUsuario === "gestor"
+            ? (usuariosMap[responsavel]?.departamento || sessionStorage.getItem('departamento'))
+            : sessionStorage.getItem('departamento');
 
-    if (!data || !responsavel || !atividade) {
-        document.getElementById('msgAdicionarAtividade').textContent = "Preencha todos os campos obrigatórios.";
-        return;
-    }
 
     const atividadesParaSalvar = [];
 
@@ -817,7 +825,10 @@ function listarUsuarios() {
             if (tipoSessao === 'gestor' && u.departamento !== depSessao) return;
             tbody.innerHTML += `
                 <tr>
-                    <td>${doc.id}</td>
+                    <td><input type="text" id="login-${doc.id}" value="${doc.id}" style="width:120px;" disabled>
+  <button onclick="editarLoginUsuario('${doc.id}')">Editar Login</button>
+</td>
+
                     <td><input type="email" id="email-${doc.id}" value="${u.email || ''}" style="width:150px"></td>
                     <td>
                         <select id="dep-${doc.id}">
@@ -850,6 +861,39 @@ function listarUsuarios() {
             `;
         });
     });
+    
+}
+
+
+window.editarLoginUsuario = function(idAntigo) {
+    const input = document.getElementById(`login-${idAntigo}`);
+    if (input.disabled) {
+        input.disabled = false;
+        input.focus();
+    } else {
+        const novoId = input.value.trim();
+        if (!novoId || novoId === idAntigo) {
+            input.disabled = true;
+            return;
+        }
+
+        const usuarioRef = db.collection('usuarios').doc(idAntigo);
+        usuarioRef.get().then(doc => {
+            if (doc.exists) {
+                const dados = doc.data();
+                db.collection('usuarios').doc(novoId).set(dados).then(() => {
+                    usuarioRef.delete().then(() => {
+                        alert("Login atualizado com sucesso!");
+                        listarUsuarios();
+                    });
+                });
+            }
+        }).catch(err => {
+            alert("Erro ao atualizar login: " + err.message);
+        });
+
+        input.disabled = true;
+    }
 }
 window.alterarDepartamentoUsuario = function(usuario) {
     const novoDep = document.getElementById('dep-' + usuario).value;
@@ -948,30 +992,6 @@ document.getElementById('btnAdicionarAtividade').onclick = function() {
 };
 function fecharModalAdicionarAtividade() {
     document.getElementById('modalAdicionarAtividade').style.display = 'none';
-}
-document.getElementById('formAdicionarAtividade').onsubmit = async function(e) {
-    e.preventDefault();
-    const data = document.getElementById('novaData').value;
-    const tipoAtv = document.getElementById('novoTipoAtividade').value;
-    let responsavel = document.getElementById('novoResponsavel').value.trim();
-    let atividade = document.getElementById('novaAtividade').value.trim();
-    let descricao = document.getElementById('novaDescricao').value.trim();
-    let departamento = sessionStorage.getItem('tipo') === "admin" || sessionStorage.getItem('tipo') === "gestor"
-        ? (usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : sessionStorage.getItem('departamento'))
-        : sessionStorage.getItem('departamento');
-    if (!data || !responsavel || !atividade) {
-        document.getElementById('msgAdicionarAtividade').textContent = "Preencha todos os campos obrigatórios.";
-        return;
-    }
-    await db.collection('atividades').add({
-        data: data,
-        responsavel: responsavel,
-        atividade: atividade,
-        tipo: tipoAtv,
-        descricao: descricao,
-        departamento: departamento || '',
-        status: 'pendente'
-    });
     document.getElementById('msgAdicionarAtividade').textContent = "Atividade adicionada com sucesso!";
     setTimeout(() => {
         fecharModalAdicionarAtividade();
