@@ -285,24 +285,53 @@ window.marcarPendenciaNaoRealizado = function(id) {
 window.processCSV = function () {
     const file = document.getElementById('csvFile').files[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = async function (e) {
         const lines = e.target.result.split('\n');
+        const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+
+        const colIndex = {
+            data: header.indexOf('data'),
+            responsavel: header.indexOf('responsavel'),
+            atividade: header.indexOf('atividade'),
+            tipo: header.indexOf('tipo'),
+            descricao: header.indexOf('descricao'),
+            diasSemana: header.indexOf('diassemana'),
+            repetirMes: header.indexOf('repetirmes'),
+            status: header.indexOf('status'),
+            departamento: header.indexOf('departamento')
+        };
+
         let atividades = [];
-        for (let line of lines) {
-            const [data, responsavel, atividade, tipo, descricao] = line.split(',');
-            if (data && responsavel && atividade) {
-                atividades.push({
-                    data: data.trim(),
-                    responsavel: responsavel.trim(),
-                    atividade: atividade.trim(),
-                    tipo: tipo ? tipo.trim() : "urgente",
-                    descricao: descricao ? descricao.trim() : "",
-                    status: 'pendente',
-                    departamento: usuariosMap[responsavel] ? usuariosMap[responsavel].departamento : ''
-                });
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const campos = line.split(',');
+
+            const atividade = {
+                data: campos[colIndex.data]?.trim() || '',
+                responsavel: campos[colIndex.responsavel]?.trim() || '',
+                atividade: campos[colIndex.atividade]?.trim() || '',
+                tipo: campos[colIndex.tipo]?.trim() || 'urgente',
+                descricao: campos[colIndex.descricao]?.trim() || '',
+                status: campos[colIndex.status]?.trim() || 'pendente',
+                departamento: campos[colIndex.departamento]?.trim() || '',
+            };
+
+            if (colIndex.diasSemana !== -1) {
+                const diasRaw = campos[colIndex.diasSemana]?.trim();
+                atividade.diasSemana = diasRaw ? diasRaw.split('|') : [];
             }
+
+            if (colIndex.repetirMes !== -1) {
+                atividade.repetirMes = campos[colIndex.repetirMes]?.trim().toLowerCase() === 'true';
+            }
+
+            atividades.push(atividade);
         }
+
         for (let i = 0; i < atividades.length; i += 400) {
             const batch = db.batch();
             const sub = atividades.slice(i, i + 400);
@@ -312,11 +341,14 @@ window.processCSV = function () {
             });
             await batch.commit();
         }
+
         alert('Importação concluída!');
         carregarAtividades();
     };
+
     reader.readAsText(file);
 };
+
 
 function carregarAtividades() {
     db.collection('atividades').get().then(snapshot => {
