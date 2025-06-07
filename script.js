@@ -14,12 +14,12 @@ let chartBarras, chartLinha, chartMotivos; //painel dashs
 
 
 // SPLASH
-window.onload = function () {
-  abrirAba("calendario");
-  carregarAtividades();
-    setTimeout(function () {
-        document.getElementById('splash').style.display = 'none';
-    }, 1100);
+const splash = document.getElementById('splash');
+splash.classList.add('ativo');
+
+setTimeout(() => {
+    splash.classList.remove('ativo');
+}, 1100); // tempo que o splash ficará visível
     document.getElementById('splash').style.display = '';
 
      // Mostrar opções de recorrência apenas se tipo for "recorrente"
@@ -30,7 +30,7 @@ window.onload = function () {
             document.getElementById('opcoesRecorrencia').style.display = tipo === 'recorrente' ? '' : 'none';
         });
     }
-};
+
 // LOGIN FLUXO
 document.getElementById('loginForm').addEventListener('submit', function (event) {
     event.preventDefault();
