@@ -661,54 +661,55 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
 
     const atividadesParaSalvar = [];
 
-    if (tipoAtv === 'recorrente' && repetirMes) {
-        const checkboxesSelecionados = document.querySelectorAll('#opcoesRecorrencia input[type="checkbox"]:checked');
-        const diasSelecionados = Array.from(checkboxesSelecionados).map(cb => parseInt(cb.value));
+    if (tipoAtv === 'recorrente') {
+    const checkboxesSelecionados = document.querySelectorAll('#opcoesRecorrencia input[type="checkbox"]:checked');
+    const diasSelecionados = Array.from(checkboxesSelecionados).map(cb => parseInt(cb.value));
 
-        if (diasSelecionados.length === 0) {
-            document.getElementById('msgAdicionarAtividade').textContent = "Selecione ao menos um dia da semana para repetir.";
-            return;
-        }
-
-        const dataInicial = new Date(data);
-        if (isNaN(dataInicial)) {
-            document.getElementById('msgAdicionarAtividade').textContent = "Data inválida.";
-            return;
-        }
-
-        const ano = dataInicial.getFullYear();
-        const mes = dataInicial.getMonth();
-        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
-
-        for (let dia = 1; dia <= ultimoDia; dia++) {
-            const atual = new Date(ano, mes, dia);
-            if (diasSelecionados.includes(atual.getDay()) && atual >= dataInicial) {
-                atividadesParaSalvar.push({
-                    data: atual.toISOString().slice(0, 10),
-                    responsavel,
-                    atividade,
-                    tipo: tipoAtv,
-                    descricao,
-                    departamento: departamento || '',
-                    status: 'pendente'
-                });
-            }
-        }
-
-        console.log(`[Recorrência] Geradas ${atividadesParaSalvar.length} atividades para o mês.`);
-    } else {
-        // Apenas uma atividade
-        atividadesParaSalvar.push({
-            data,
-            responsavel,
-            atividade,
-            tipo: tipoAtv,
-            descricao,
-            departamento: departamento || '',
-            status: 'pendente'
-        });
-        console.log(`[Única] Adicionando uma atividade única para ${data}`);
+    if (diasSelecionados.length === 0) {
+        document.getElementById('msgAdicionarAtividade').textContent = "Selecione ao menos um dia da semana para repetir.";
+        return;
     }
+
+    const dataInicial = new Date(data);
+    if (isNaN(dataInicial)) {
+        document.getElementById('msgAdicionarAtividade').textContent = "Data inválida.";
+        return;
+    }
+
+    const ano = dataInicial.getFullYear();
+    const mes = dataInicial.getMonth();
+    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+    for (let dia = 1; dia <= ultimoDia; dia++) {
+        const atual = new Date(ano, mes, dia);
+        if (diasSelecionados.includes(atual.getDay())) {
+            atividadesParaSalvar.push({
+                data: atual.toISOString().slice(0, 10),
+                responsavel,
+                atividade,
+                tipo: tipoAtv,
+                descricao,
+                departamento: departamento || '',
+                status: 'pendente'
+            });
+        }
+    }
+
+    console.log(`[Recorrente] Dias gerados: ${atividadesParaSalvar.length}`);
+} else {
+    // Tipo urgente ou extra — adiciona uma única atividade
+    atividadesParaSalvar.push({
+        data,
+        responsavel,
+        atividade,
+        tipo: tipoAtv,
+        descricao,
+        departamento: departamento || '',
+        status: 'pendente'
+    });
+    console.log(`[Única] Adicionando uma atividade para ${data}`);
+}
+
 
     const batch = db.batch();
     atividadesParaSalvar.forEach(atv => {
