@@ -143,8 +143,13 @@ window.abrirAba = function (aba) {
     marcarAbaAtiva('aba-' + aba);
     document.getElementById('aba-' + aba).style.display = '';
     if (aba === 'dashboard' && !dashboardRenderizado) {
-    atualizarDashboard();
-    dashboardRenderizado = true;
+    if (atividades.length > 0) {
+        atualizarDashboard();
+        dashboardRenderizado = true;
+    } else {
+        console.warn("Dashboard ainda não carregado: sem dados.");
+    }
+
 }
     if (aba === 'logs') carregarLogsExclusao();
     if (aba === 'usuarios') listarUsuarios();
@@ -393,7 +398,12 @@ function carregarAtividades() {
         preencherSelectResponsavel();
         renderizarTabelaAtividades();
         inicializarCalendario();
-// Dashboard e gráficos só quando a aba for acessada
+// Se a aba dashboard estiver visível e ainda não foi renderizada, atualiza agora
+if (document.getElementById("aba-dashboard").style.display !== "none" && !dashboardRenderizado) {
+    atualizarDashboard();
+    dashboardRenderizado = true;
+}
+
 
     });
 }
