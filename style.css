@@ -267,7 +267,11 @@ body.dark #legendaCores {
     margin: 0 auto;
     max-width: 1600px;
     min-height: 740px;
+    overflow-y: scroll !important;
+    
 }
+
+
 #calendar .fc-event-title,
 #calendar .fc-event-time,
 #calendar .fc-event {
