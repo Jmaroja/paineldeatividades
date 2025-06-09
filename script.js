@@ -682,16 +682,23 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
 
     for (let dia = 1; dia <= ultimoDia; dia++) {
         const atual = new Date(ano, mes, dia);
-        if (diasSelecionados.includes(atual.getDay())) {
-            atividadesParaSalvar.push({
-                data: atual.toISOString().slice(0, 10),
-                responsavel,
-                atividade,
-                tipo: tipoAtv,
-                descricao,
-                departamento: departamento || '',
-                status: 'pendente'
-            });
+        for (let dia = 1; dia <= ultimoDia; dia++) {
+    const atual = new Date(ano, mes, dia);
+    if (
+        diasSelecionados.includes(atual.getDay()) &&
+        atual >= dataInicial
+    ) {
+        atividadesParaSalvar.push({
+            data: atual.toISOString().slice(0, 10),
+            responsavel,
+            atividade,
+            tipo: tipoAtv,
+            descricao,
+            departamento: departamento || '',
+            status: 'pendente'
+        });
+    }
+
         }
     }
 
