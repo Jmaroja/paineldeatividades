@@ -762,4 +762,13 @@ body.dark .dias-semana label:has(input:checked) {
 .btn-limpar:hover,
 .btn-adicionar:hover {
     background: linear-gradient(135deg, #1e40af, #1d4ed8);
+}#diaFixo {
+  width: 100px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #bcd7fc;
+  background: #f8fbff;
+  font-weight: 500;
+  margin-top: 6px;
 }
