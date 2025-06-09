@@ -87,6 +87,11 @@ function exibirSistema(usuario, tipo, departamento) {
         document.getElementById('usuarioLogado').textContent = `Usuário: ${usuario}`;
         document.getElementById('departamentoLogado').textContent = departamento ? `Depto: ${departamento}` : '';
         document.title = "Painel de Atividades";
+        if (tipo === "comum") {
+            document.getElementById("btnDashboard").style.display = "none";
+            document.getElementById("filtrosLaterais").style.display = "none";
+}
+
         if (tipo === "admin") {
             document.getElementById('btnUsuarios').style.display = '';
             document.getElementById('btnLimparCalendario').style.display = '';
