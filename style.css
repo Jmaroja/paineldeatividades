@@ -12,6 +12,11 @@ h1, h2, h3, .header-content {
     font-family: 'Roboto', Arial, sans-serif;
     font-weight: 700;
 }
+/* Deixa o nome do mês e dos dias da semana com primeira letra maiúscula */
+.fc .fc-toolbar-title,
+.fc .fc-col-header-cell-cushion {
+    text-transform: capitalize;
+}
 
 /* HEADER */
 header {
