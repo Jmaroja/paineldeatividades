@@ -220,20 +220,39 @@
                     <option value="extra">🟡 Extra</option>
                 </select>
             </label><br>
-            <!-- BLOCO QUE SÓ APARECE PARA RECORRENTE -->
+ <!-- BLOCO QUE SÓ APARECE PARA RECORRENTE -->
 <div id="opcoesRecorrencia" style="display:none; margin-top: 14px;">
-    <label><b>Repetir em quais dias da semana?</b></label>
-    <div class="dias-semana" style="margin: 8px 0 12px;">
-        <label><input type="checkbox" value="1"> Seg</label>
-        <label><input type="checkbox" value="2"> Ter</label>
-        <label><input type="checkbox" value="3"> Qua</label>
-        <label><input type="checkbox" value="4"> Qui</label>
-        <label><input type="checkbox" value="5"> Sex</label>
+    <label><b>Tipo de recorrência:</b></label>
+    <select id="tipoRecorrenciaAvancada">
+        <option value="semana">Por dia da semana</option>
+        <option value="mensal">Por dia fixo do mês</option>
+    </select>
+
+    <!-- Semana -->
+    <div id="blocoSemana" style="margin-top: 10px;">
+        <label><b>Repetir em quais dias da semana?</b></label>
+        <div class="dias-semana" style="margin: 8px 0 12px;">
+            <label><input type="checkbox" value="1"> Seg</label>
+            <label><input type="checkbox" value="2"> Ter</label>
+            <label><input type="checkbox" value="3"> Qua</label>
+            <label><input type="checkbox" value="4"> Qui</label>
+            <label><input type="checkbox" value="5"> Sex</label>
+        </div>
     </div>
+
+    <!-- Mensal -->
+    <div id="blocoMensal" style="display: none; margin-top: 12px;">
+        <label>Dia fixo do mês:<br>
+            <input type="number" id="diaFixo" min="1" max="31" placeholder="Ex: 10 ou 20">
+        </label>
+    </div>
+
+    <!-- (opcional, pode ser removido se for obsoleto) -->
     <label style="display:block; margin-top:6px;">
         <input type="checkbox" id="repetirMes"> Gerar para o mês inteiro
     </label>
 </div>
+
 
         
 

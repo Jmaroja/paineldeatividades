@@ -30,6 +30,16 @@ setTimeout(() => {
             document.getElementById('opcoesRecorrencia').style.display = tipo === 'recorrente' ? '' : 'none';
         });
     }
+    // Alternar entre recorrência por semana e por dia fixo
+const selectTipoRecorrencia = document.getElementById("tipoRecorrenciaAvancada");
+if (selectTipoRecorrencia) {
+    selectTipoRecorrencia.addEventListener("change", function () {
+        const tipo = this.value;
+        document.getElementById("blocoSemana").style.display = tipo === "semana" ? "" : "none";
+        document.getElementById("blocoMensal").style.display = tipo === "mensal" ? "" : "none";
+    });
+}
+
 
 // LOGIN FLUXO
 document.getElementById('loginForm').addEventListener('submit', function (event) {
@@ -661,15 +671,8 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
 
     const atividadesParaSalvar = [];
 
-    if (tipoAtv === 'recorrente') {
-    const checkboxesSelecionados = document.querySelectorAll('#opcoesRecorrencia input[type="checkbox"]:checked');
-    const diasSelecionados = Array.from(checkboxesSelecionados).map(cb => parseInt(cb.value));
-
-    if (diasSelecionados.length === 0) {
-        document.getElementById('msgAdicionarAtividade').textContent = "Selecione ao menos um dia da semana para repetir.";
-        return;
-    }
-
+   if (tipoAtv === 'recorrente') {
+    const tipoRecorrencia = document.getElementById('tipoRecorrenciaAvancada').value;
     const dataInicial = new Date(data);
     if (isNaN(dataInicial)) {
         document.getElementById('msgAdicionarAtividade').textContent = "Data inválida.";
@@ -678,32 +681,65 @@ document.getElementById('formAdicionarAtividade').onsubmit = async function (e) 
 
     const ano = dataInicial.getFullYear();
     const mes = dataInicial.getMonth();
-    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
 
-    for (let dia = 1; dia <= ultimoDia; dia++) {
-        const atual = new Date(ano, mes, dia);
-        for (let dia = 1; dia <= ultimoDia; dia++) {
-    const atual = new Date(ano, mes, dia);
-    if (
-        diasSelecionados.includes(atual.getDay()) &&
-        atual >= dataInicial
-    ) {
-        atividadesParaSalvar.push({
-            data: atual.toISOString().slice(0, 10),
-            responsavel,
-            atividade,
-            tipo: tipoAtv,
-            descricao,
-            departamento: departamento || '',
-            status: 'pendente'
-        });
-    }
+    if (tipoRecorrencia === 'semana') {
+        const checkboxesSelecionados = document.querySelectorAll('#blocoSemana input[type="checkbox"]:checked');
+        const diasSelecionados = Array.from(checkboxesSelecionados).map(cb => parseInt(cb.value));
 
+        if (diasSelecionados.length === 0) {
+            document.getElementById('msgAdicionarAtividade').textContent = "Selecione ao menos um dia da semana para repetir.";
+            return;
         }
+
+        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+        for (let dia = 1; dia <= ultimoDia; dia++) {
+            const atual = new Date(ano, mes, dia);
+            if (
+                diasSelecionados.includes(atual.getDay()) &&
+                atual >= dataInicial
+            ) {
+                atividadesParaSalvar.push({
+                    data: atual.toISOString().slice(0, 10),
+                    responsavel,
+                    atividade,
+                    tipo: tipoAtv,
+                    descricao,
+                    departamento: departamento || '',
+                    status: 'pendente'
+                });
+            }
+        }
+
+        console.log(`[Recorrente - Semana] Dias gerados: ${atividadesParaSalvar.length}`);
     }
 
-    console.log(`[Recorrente] Dias gerados: ${atividadesParaSalvar.length}`);
-} else {
+    else if (tipoRecorrencia === 'mensal') {
+        const diaFixo = parseInt(document.getElementById('diaFixo').value);
+        if (isNaN(diaFixo) || diaFixo < 1 || diaFixo > 31) {
+            document.getElementById('msgAdicionarAtividade').textContent = "Informe um dia do mês válido.";
+            return;
+        }
+
+        for (let i = 0; i < 3; i++) { // próximos 3 meses
+            const dataGerada = new Date(ano, mes + i, diaFixo);
+            if (dataGerada >= dataInicial && dataGerada.getDate() === diaFixo) {
+                atividadesParaSalvar.push({
+                    data: dataGerada.toISOString().slice(0, 10),
+                    responsavel,
+                    atividade,
+                    tipo: tipoAtv,
+                    descricao,
+                    departamento: departamento || '',
+                    status: 'pendente'
+                });
+            }
+        }
+
+        console.log(`[Recorrente - Mensal] Dias gerados: ${atividadesParaSalvar.length}`);
+    }
+}
+else {
     // Tipo urgente ou extra — adiciona uma única atividade
     atividadesParaSalvar.push({
         data,
