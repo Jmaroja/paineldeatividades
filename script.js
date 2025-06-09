@@ -143,14 +143,32 @@ window.abrirAba = function (aba) {
     marcarAbaAtiva('aba-' + aba);
     document.getElementById('aba-' + aba).style.display = '';
     if (aba === 'dashboard' && !dashboardRenderizado) {
-    if (atividades.length > 0) {
+    if (aba === 'dashboard') {
+    if (!dashboardRenderizado && atividadesFiltradas.length > 0) {
         atualizarDashboard();
+        renderizarGraficos();
         dashboardRenderizado = true;
-    } else {
-        console.warn("Dashboard ainda não carregado: sem dados.");
+    } else if (!dashboardRenderizado) {
+        setTimeout(() => {
+            if (atividadesFiltradas.length > 0) {
+                atualizarDashboard();
+                renderizarGraficos();
+                dashboardRenderizado = true;
+            }
+        }, 500);
     }
 
+    } else {
+        setTimeout(() => {
+            if (atividadesFiltradas.length > 0) {
+                atualizarDashboard();
+                renderizarGraficos();
+                dashboardRenderizado = true;
+            }
+        }, 400);
+    }
 }
+
     if (aba === 'logs') carregarLogsExclusao();
     if (aba === 'usuarios') listarUsuarios();
     if (aba === 'calendario') inicializarCalendario();
@@ -401,7 +419,9 @@ function carregarAtividades() {
 // Se a aba dashboard estiver visível e ainda não foi renderizada, atualiza agora
 if (document.getElementById("aba-dashboard").style.display !== "none" && !dashboardRenderizado) {
     atualizarDashboard();
+    renderizarGraficos();
     dashboardRenderizado = true;
+
 }
 
 
@@ -855,12 +875,21 @@ function atualizarDashboard() {
 }
 
 function renderizarGraficos() {
-    // Barras
+    const filtro = document.getElementById("selectDashboardResponsavel");
+    const responsavelSelecionado = filtro ? filtro.value : 'todos';
+
+    const atividadesBase = responsavelSelecionado === 'todos'
+        ? atividadesFiltradas
+        : atividadesFiltradas.filter(a => a.responsavel === responsavelSelecionado);
+
+    // Gráfico de barras
     const ctxBarras = document.getElementById('graficoBarras').getContext('2d');
-    if (chartBarras) chartBarras.destroy();chartBarras = null;
-    const realizadas = atividadesFiltradas.filter(a => a.status === 'realizado').length;
-    const naoRealizadas = atividadesFiltradas.filter(a => a.status === 'naoRealizado').length;
-    const pendentes = atividadesFiltradas.filter(a => !a.status || a.status === 'pendente').length;
+    if (chartBarras) chartBarras.destroy(); chartBarras = null;
+
+    const realizadas = atividadesBase.filter(a => a.status === 'realizado').length;
+    const naoRealizadas = atividadesBase.filter(a => a.status === 'naoRealizado').length;
+    const pendentes = atividadesBase.filter(a => !a.status || a.status === 'pendente').length;
+
     chartBarras = new Chart(ctxBarras, {
         type: 'bar',
         data: {
@@ -868,46 +897,94 @@ function renderizarGraficos() {
             datasets: [{
                 data: [realizadas, naoRealizadas, pendentes],
                 label: 'Atividades',
+                backgroundColor: ['#4caf50', '#f44336', '#ff9800']
             }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Resumo de Status das Atividades'
+                }
+            }
         }
     });
-    // Linha
+
+    // Gráfico de linha (evolução)
     const ctxLinha = document.getElementById('graficoLinha').getContext('2d');
-    if (chartLinha) chartLinha.destroy();chartLinha = null;
+    if (chartLinha) chartLinha.destroy(); chartLinha = null;
+
     let dadosData = {};
-    atividadesFiltradas.forEach(a => {
+    atividadesBase.forEach(a => {
         if (!dadosData[a.data]) dadosData[a.data] = 0;
         if (a.status === 'realizado') dadosData[a.data]++;
     });
+
     const datas = Object.keys(dadosData).sort();
     const valores = datas.map(d => dadosData[d]);
+
     chartLinha = new Chart(ctxLinha, {
         type: 'line',
         data: {
             labels: datas,
             datasets: [{
                 data: valores,
-                label: 'Atividades Realizadas'
+                label: 'Atividades Realizadas',
+                borderColor: '#2196f3',
+                fill: false
             }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: {
+                    display: true,
+                    text: 'Evolução Diária de Atividades'
+                }
+            }
         }
     });
-    // Motivos (pizza)
-    const ctxMotivos = document.getElementById('graficoMotivos').getContext('2d');
-    if (chartMotivos) chartMotivos.destroy();chartMotivos = null;
-    let motivos = {};
-    atividadesFiltradas.filter(a => a.status === 'naoRealizado').forEach(a => {
-        motivos[a.motivo] = (motivos[a.motivo] || 0) + 1;
-    });
-    chartMotivos = new Chart(ctxMotivos, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(motivos),
-            datasets: [{
-                data: Object.values(motivos)
-            }]
-        }
-    });
+
+    // Gráfico de pizza (motivos)
+    const elMotivos = document.getElementById('graficoMotivos');
+    if (elMotivos) {
+        const ctxMotivos = elMotivos.getContext('2d');
+        if (chartMotivos) chartMotivos.destroy(); chartMotivos = null;
+
+        let motivos = {};
+        atividadesBase
+            .filter(a => a.status === 'naoRealizado' && a.motivo && a.motivo.trim() !== "")
+            .forEach(a => {
+                const m = a.motivo.trim();
+                motivos[m] = (motivos[m] || 0) + 1;
+            });
+
+        chartMotivos = new Chart(ctxMotivos, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(motivos),
+                datasets: [{
+                    data: Object.values(motivos),
+                    backgroundColor: ['#f44336', '#ff9800', '#03a9f4', '#4caf50', '#9c27b0']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: {
+                        display: true,
+                        text: 'Motivos de Não Realização'
+                    }
+                }
+            }
+        });
+    }
 }
+
 
 // EXPORTAR CSV
 window.exportarResumo = function () {
