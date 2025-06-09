@@ -142,7 +142,10 @@ window.abrirAba = function (aba) {
     document.querySelectorAll('.painel-content section').forEach(sec => sec.style.display = 'none');
     marcarAbaAtiva('aba-' + aba);
     document.getElementById('aba-' + aba).style.display = '';
-    if (aba === 'dashboard') atualizarDashboard();
+    if (aba === 'dashboard' && !dashboardRenderizado) {
+    atualizarDashboard();
+    dashboardRenderizado = true;
+}
     if (aba === 'logs') carregarLogsExclusao();
     if (aba === 'usuarios') listarUsuarios();
     if (aba === 'calendario') inicializarCalendario();
@@ -193,6 +196,8 @@ let todasAtividades = [];
 let atividadesFiltradas = [];
 let calendar = null;
 let usuariosMap = {};
+let dashboardRenderizado = false;
+
 
 function listarUsuariosMap() {
     db.collection('usuarios').get().then(snapshot => {
@@ -387,10 +392,9 @@ function carregarAtividades() {
         preencherSelectDepartamento();
         preencherSelectResponsavel();
         renderizarTabelaAtividades();
-        atualizarDashboard();
-        renderizarGraficos();
         inicializarCalendario();
-        exibirAlertaTarefasDia();
+// Dashboard e gráficos só quando a aba for acessada
+
     });
 }
 function preencherSelectDepartamento() {
