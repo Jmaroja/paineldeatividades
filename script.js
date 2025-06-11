@@ -390,8 +390,7 @@ window.processCSV = function () {
         carregarAtividades();
 
     };
-    
-    // --- alerta sweetalert2
+     // --- alerta sweetalert2
 Swal.fire({
   icon: 'success',
   title: 'Importação concluída!',
@@ -522,7 +521,7 @@ function inicializarCalendario() {
             }
         })),
         eventClick: function(info) {
-            abrirModalPelaData(info.event.startStr, info.event.title);
+            abrirModal(info.event.id)
         },
         eventDrop: async function(info) {
             const atv = todasAtividades.find(a => a.id === info.event.id);
