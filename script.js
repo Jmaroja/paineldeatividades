@@ -802,10 +802,10 @@ else {
     await batch.commit();
 
     document.getElementById('msgAdicionarAtividade').textContent = "Atividade(s) adicionada(s) com sucesso!";
-    setTimeout(() => {
-        fecharModalAdicionarAtividade();
-        carregarAtividades();
-    }, 900);
+setTimeout(() => {
+    fecharModalAdicionarAtividade();
+    carregarAtividades();
+}, 900);
 };
 
 
@@ -1211,10 +1211,7 @@ document.getElementById('btnAdicionarAtividade').onclick = function() {
 function fecharModalAdicionarAtividade() {
     document.getElementById('modalAdicionarAtividade').style.display = 'none';
     document.getElementById('msgAdicionarAtividade').textContent = "Atividade adicionada com sucesso!";
-    setTimeout(() => {
-        fecharModalAdicionarAtividade();
-        carregarAtividades();
-    }, 900);
+   
 };
 // Modais extras
 function fecharModalAjuda() {
