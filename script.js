@@ -388,8 +388,18 @@ window.processCSV = function () {
 
         alert('Importação concluída!');
         carregarAtividades();
-    };
 
+    };
+    
+    // --- alerta sweetalert2
+Swal.fire({
+  icon: 'success',
+  title: 'Importação concluída!',
+  showConfirmButton: false,
+  timer: 1800
+});
+
+    
     reader.readAsText(file);
 };
 
@@ -639,30 +649,49 @@ window.marcarStatusModal = function (realizado) {
 window.excluirAtividadeDireto = function () {
     if (!atividadeSelecionada || !atividadeSelecionada.id) return;
 
-    if (confirm(`Tem certeza que deseja excluir a atividade "${atividadeSelecionada.atividade}"?`)) {
-        // Grava log de exclusão
-        db.collection('logs_exclusao').add({
-            datahora: new Date().toISOString(),
-            quem: sessionStorage.getItem('usuario'),
-            motivo: 'Exclusão direta via modal de detalhes',
-            atividade: {
-                data: atividadeSelecionada.data,
-                departamento: atividadeSelecionada.departamento || '',
-                responsavel: atividadeSelecionada.responsavel,
-                atividade: atividadeSelecionada.atividade,
-                tipo: atividadeSelecionada.tipo || 'urgente',
-                status: atividadeSelecionada.status || 'pendente'
-            }
-        });
+   Swal.fire({
+  title: 'Excluir atividade?',
+  text: `Tem certeza que deseja excluir a atividade "${atividadeSelecionada.atividade}"?`,
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#d33',
+  cancelButtonColor: '#3085d6',
+  confirmButtonText: 'Sim, excluir',
+  cancelButtonText: 'Cancelar'
+}).then((result) => {
+  if (result.isConfirmed) {
+    // Grava log de exclusão
+    db.collection('logs_exclusao').add({
+      datahora: new Date().toISOString(),
+      quem: sessionStorage.getItem('usuario'),
+      motivo: 'Exclusão direta via modal de detalhes',
+      atividade: {
+        data: atividadeSelecionada.data,
+        departamento: atividadeSelecionada.departamento || '',
+        responsavel: atividadeSelecionada.responsavel,
+        atividade: atividadeSelecionada.atividade,
+        tipo: atividadeSelecionada.tipo || 'urgente',
+        status: atividadeSelecionada.status || 'pendente'
+      }
+    });
 
-        // Exclui atividade
-        db.collection('atividades').doc(atividadeSelecionada.id).delete().then(() => {
-            fecharModal();
-            carregarAtividades();
-            alert("Atividade excluída com sucesso.");
-        });
+    // Exclui atividade
+    db.collection('atividades').doc(atividadeSelecionada.id).delete().then(() => {
+      fecharModal();
+      carregarAtividades();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Atividade excluída com sucesso!',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    });
+  }
+});
+
     }
-};
+;
 
 // MODAL EDITAR ATIVIDADE
 window.abrirModalEditarAtividade = function(id) {
