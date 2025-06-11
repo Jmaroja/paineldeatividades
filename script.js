@@ -805,7 +805,7 @@ else {
 setTimeout(() => {
     fecharModalAdicionarAtividade();
     carregarAtividades();
-}, 900);
+}, 1500);
 };
 
 
