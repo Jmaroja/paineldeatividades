@@ -17,6 +17,23 @@ h1, h2, h3, .header-content {
 .fc .fc-col-header-cell-cushion {
     text-transform: capitalize;
 }
+.login-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.logo-login {
+  height: 36px;
+  width: auto;
+}
+
+
 
 /* HEADER */
 header {
@@ -490,7 +507,7 @@ table th {
 }
 .modal-content .btn-success:hover { background: #0d8451;}
 .modal-content .btn-warning:hover { background: #b99905;}
-.modal-content .btn-danger:hover { background: #a71c1c;}
+.modal-content .btn-danger:hover { background: #df6c6c;}
 .modal-content .atividade-info > div { margin-bottom: 5px; }
 .modal-content .modal-buttons { margin-top: 17px; }
 
@@ -526,7 +543,7 @@ table th {
 }
 .pendencia-bloco .btn-pendencia.reagendar { background: #2980ef; }
 .pendencia-bloco .btn-pendencia.realizado { background: #22b573; }
-.pendencia-bloco .btn-pendencia.naorealizado { background: #e74c3c; }
+.pendencia-bloco .btn-pendencia.naorealizado { background: #ee1901; }
 
 /* FOOTER */
 footer {
