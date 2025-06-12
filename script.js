@@ -832,6 +832,14 @@ else {
     document.getElementById('msgAdicionarAtividade').textContent = "Atividade(s) adicionada(s) com sucesso!";
 setTimeout(() => {
     fecharModalAdicionarAtividade();
+     Swal.fire({
+        icon: 'success',
+        title: 'Atividade criada!',
+        text: 'A nova atividade foi adicionada com sucesso.',
+        showConfirmButton: false,
+        timer: 2000
+    });
+
     carregarAtividades();
 }, 1500);
 };
