@@ -411,31 +411,46 @@ function carregarAtividades() {
             atividade.id = doc.id;
             todasAtividades.push(atividade);
         });
-        // FILTRO MULTI-SETOR: aplica restrição para gestor e comum
+
         const tipo = sessionStorage.getItem('tipo');
         const departamento = sessionStorage.getItem('departamento');
+
         if (tipo === "gestor") {
             todasAtividades = todasAtividades.filter(a => (a.departamento || '') === departamento);
         } else if (tipo === "comum") {
             const usuario = sessionStorage.getItem('usuario');
             todasAtividades = todasAtividades.filter(a => a.responsavel === usuario);
         }
+
         atividadesFiltradas = [...todasAtividades];
+
         preencherSelectDepartamento();
         preencherSelectResponsavel();
         renderizarTabelaAtividades();
+
+        // Aqui está o ajuste crucial:
+        // Inicializar apenas uma vez o calendário, com todas as atividades, já que inicialmente não há filtro aplicado
         inicializarCalendario();
-// Se a aba dashboard estiver visível e ainda não foi renderizada, atualiza agora
-if (document.getElementById("aba-dashboard").style.display !== "none" && !dashboardRenderizado) {
-    atualizarDashboard();
-    renderizarGraficos();
-    dashboardRenderizado = true;
 
-}
+        // Chama filtro APENAS se houver filtro definido previamente
+        if (document.getElementById('departamentoSelect').value !== 'todos' ||
+            document.getElementById('responsavelSelect').value !== 'todos') {
+            aplicarfiltros();
+        }
 
-
+        if (document.getElementById("aba-dashboard").style.display !== "none" && !dashboardRenderizado) {
+            atualizarDashboard();
+            renderizarGraficos();
+            dashboardRenderizado = true;
+        }
     });
+
+
+
 }
+
+
+    
 function preencherSelectDepartamento() {
     const select = document.getElementById('departamentoSelect');
     const departamentos = [...new Set(todasAtividades.map(a => a.departamento || 'Outros'))];
@@ -444,6 +459,7 @@ function preencherSelectDepartamento() {
         select.innerHTML += `<option value="${dep}">${dep}</option>`;
     });
 }
+
 function preencherSelectResponsavel() {
     const select = document.getElementById('responsavelSelect');
     const responsaveis = [...new Set(todasAtividades.map(a => a.responsavel))];
@@ -451,7 +467,30 @@ function preencherSelectResponsavel() {
     responsaveis.forEach(r => {
         select.innerHTML += `<option value="${r}">${r}</option>`;
     });
+
+
+    
 }
+
+
+
+function aplicarfiltros() {
+    const filtroDepartamento = document.getElementById('departamentoSelect').value;
+    const filtroResponsavel = document.getElementById('responsavelSelect').value;
+
+    atividadesFiltradas = todasAtividades.filter(a => {
+        const departamentoMatch = (filtroDepartamento === 'todos' || a.departamento === filtroDepartamento);
+        const responsavelMatch = (filtroResponsavel === 'todos' || a.responsavel === filtroResponsavel);
+        return departamentoMatch && responsavelMatch;
+    });
+
+    renderizarTabelaAtividades();
+    inicializarCalendarioFiltrado(); // substitua pela nova função
+}
+
+
+
+
 function exibirAlertaTarefasDia() {
     const usuario = sessionStorage.getItem('usuario');
     const tipo = sessionStorage.getItem('tipo');
@@ -474,7 +513,7 @@ function exibirAlertaTarefasDia() {
         alerta.style.display = '';
     }
 }
-
+// A função original 
 function inicializarCalendario() {
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
@@ -488,29 +527,61 @@ function inicializarCalendario() {
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
+        events: todasAtividades.map(a => ({
+            id: a.id,
+            title: tipo === "gestor" ? `${a.responsavel}: ${a.atividade}` : a.atividade,
+            start: a.data,
+            color: a.status === "realizado" ? "#22b573"
+                  : a.status === "naoRealizado" ? "#d32f2f"
+                  : a.tipo === "urgente" ? "#e74c3c"
+                  : a.tipo === "recorrente" ? "#2980ef"
+                  : "#ffc107",
+            classNames: [
+                a.status === "realizado" ? "realizado"
+                : a.status === "naoRealizado" ? "naoRealizado"
+                : (a.tipo || 'urgente')
+            ],
+        })),
+        eventClick: function(info) { abrirModal(info.event.id); }
+    });
+    calendar.render();
+}
+
+function inicializarCalendarioFiltrado() {
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+    calendarEl.innerHTML = '';
+
+    if (calendar) {
+        calendar.destroy();
+        calendar = null;
+    }
+
+    const usuario = sessionStorage.getItem('usuario');
+    const tipo = sessionStorage.getItem('tipo');
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek'
         },
         editable: true,
-        events: todasAtividades.map(a => ({
+        events: atividadesFiltradas.map(a => ({
             id: a.id,
-            title: sessionStorage.getItem('tipo') === "gestor" ? `${a.responsavel}: ${a.atividade}` : a.atividade,
+            title: tipo === "gestor" ? `${a.responsavel}: ${a.atividade}` : a.atividade,
             start: a.data,
-            color: a.status === "realizado"
-                ? "#22b573"
-                : a.status === "naoRealizado"
-                ? "#d32f2f" // vermelho escur
-                : a.tipo === "urgente" ? "#e74c3c"
-                : a.tipo === "recorrente" ? "#2980ef"
-                : "#ffc107",
+            color: a.status === "realizado" ? "#22b573"
+                  : a.status === "naoRealizado" ? "#d32f2f"
+                  : a.tipo === "urgente" ? "#e74c3c"
+                  : a.tipo === "recorrente" ? "#2980ef"
+                  : "#ffc107",
             classNames: [
-                 a.status === "realizado"
-                ? "realizado"
-                : a.status === "naoRealizado"
-                ? "naoRealizado"
-            : (a.tipo || 'urgente')
+                a.status === "realizado" ? "realizado"
+                : a.status === "naoRealizado" ? "naoRealizado"
+                : (a.tipo || 'urgente')
             ],
             extendedProps: {
                 responsavel: a.responsavel,
@@ -521,14 +592,11 @@ function inicializarCalendario() {
             }
         })),
         eventClick: function(info) {
-            abrirModal(info.event.id)
+            abrirModal(info.event.id);
         },
         eventDrop: async function(info) {
-            const atv = todasAtividades.find(a => a.id === info.event.id);
-            if (
-                tipo === "admin" ||
-                (atv && atv.responsavel === usuario)
-            ) {
+            const atv = atividadesFiltradas.find(a => a.id === info.event.id);
+            if (tipo === "admin" || (atv && atv.responsavel === usuario)) {
                 await db.collection('atividades').doc(info.event.id).update({
                     data: info.event.startStr
                 });
@@ -539,7 +607,6 @@ function inicializarCalendario() {
             }
         },
         eventDidMount: function(info) {
-            // Tooltip igual Google: Atividade, Data, Descrição
             const descricao = info.event.extendedProps.descricao || '';
             const atividade = info.event.title;
             const data = info.event.start.toLocaleDateString();
@@ -548,20 +615,23 @@ function inicializarCalendario() {
             info.el.title = txt;
         },
         buttonText: {
-            today:    'Hoje',
-            month:    'Mês',
-            week:     'Semana',
-            day:      'Dia',
-            list:     'Lista'
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana',
+            day: 'Dia',
+            list: 'Lista'
         }
     });
+
     calendar.render();
+}
+
     setTimeout(() => {
         document.querySelectorAll('#calendar .fc-scroller, #calendar .fc-scrollgrid-sync-table, #calendar .fc-daygrid-body, #calendar .fc-daygrid-body-natural').forEach(el => {
             el.style.overflowY = 'hidden';
         });
     }, 300);
-}
+
 function abrirModalPelaData(data, atividadeTitulo) {
     const atv = todasAtividades.find(a =>
         a.data === data &&
